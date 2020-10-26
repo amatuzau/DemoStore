@@ -9,7 +9,7 @@ using Store.DAL;
 namespace Store.DAL.Migrations
 {
     [DbContext(typeof(StoreContext))]
-    [Migration("20201019120939_Initial")]
+    [Migration("20201019175331_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

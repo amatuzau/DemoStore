@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Bogus.DataSets;
 using Microsoft.EntityFrameworkCore;
 using Store.DAL;
 using Store.DAL.Models;
@@ -27,6 +28,13 @@ namespace Store.App.Core
         public async Task<IEnumerable<Product>> GetProducts()
         {
             return await context.Products.ToListAsync();
+        }
+
+        public IQueryable<Product> GetProductsFilteredByPrice(decimal price)
+        {
+            var products = context.Products.Where(p => p.Price > price);
+
+            return products;
         }
 
         public async Task<Product> GetProductById(int id)

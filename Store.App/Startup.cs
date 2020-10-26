@@ -1,7 +1,5 @@
-using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +11,10 @@ using Store.Core;
 using Store.DAL;
 using Store.DAL.Ado;
 using Store.DAL.Models;
+using Microsoft.AspNetCore.Identity;
+using System;
+using Microsoft.AspNetCore.Antiforgery;
+using FluentValidation.AspNetCore;
 
 namespace Store.App
 {
@@ -28,12 +30,13 @@ namespace Store.App
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddMvc().AddFluentValidation(f => f.RegisterValidatorsFromAssemblyContaining<Startup>());
 
             services.Configure<AdoOptions>(Configuration.GetSection(nameof(AdoOptions)));
             
             services.AddScoped<IProductsService, ProductsService>();
             services.AddScoped<ICartService, CartService>();
+            services.AddScoped<CartIdHandler>();
 
             var dataSource = Configuration.GetValue<string>("DataSource");
             
@@ -55,6 +58,47 @@ namespace Store.App
                     });
                     break;
             }
+
+            services.AddDefaultIdentity<StoreUser>().AddEntityFrameworkStores<StoreContext>();
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                // Password settings.
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 1;
+
+                // Lockout settings.
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+
+                // User settings.
+                options.User.AllowedUserNameCharacters =
+                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                options.User.RequireUniqueEmail = false;
+            });
+
+            services.Configure<AntiforgeryOptions>(opts =>
+            {
+                opts.FormFieldName = "StoreSecretInput";
+                opts.HeaderName = "X-CSRF-TOKEN";
+                opts.SuppressXFrameOptionsHeader = false;
+            });
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                // Cookie settings
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+
+                options.LoginPath = "/Identity/Account/Login";
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                options.SlidingExpiration = true;
+            });
         }
 
 
@@ -79,6 +123,8 @@ namespace Store.App
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<CartIdHandler>();
 
             app.UseEndpoints(endpoints =>
             {

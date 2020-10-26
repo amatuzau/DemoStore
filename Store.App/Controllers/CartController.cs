@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +11,7 @@ namespace Store.App.Controllers
     [Authorize]
     public class CartController : Controller
     {
-        private const string CartCookieName = "DemoStore.CartId";
+
         private readonly ICartService cartService;
         private readonly IProductsService productsService;
 
@@ -22,7 +23,7 @@ namespace Store.App.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var cartId = await GetSetCartId();
+            var cartId = HttpContext.GetCartId();
             var cart = await cartService.FindCart(cartId);
             var items = cart.CartItems.Select(ci => new CartViewModel
             {
@@ -37,7 +38,7 @@ namespace Store.App.Controllers
         public async Task<IActionResult> Add(int id, int count)
         {
             var product = await productsService.GetProductById(id);
-            await cartService.AddItemToCart(await GetSetCartId(), product, count);
+            await cartService.AddItemToCart(HttpContext.GetCartId(), product, count);
             return RedirectToAction("Index", "Store");
         }
 
@@ -45,7 +46,7 @@ namespace Store.App.Controllers
         public async Task<IActionResult> Remove(int id)
         {
             var product = await productsService.GetProductById(id);
-            await cartService.RemoveItemFromCart(await GetSetCartId(), product);
+            await cartService.RemoveItemFromCart(HttpContext.GetCartId(), product);
             return RedirectToAction("Index");
         }
 
@@ -53,7 +54,7 @@ namespace Store.App.Controllers
         public async Task<IActionResult> ChangeCount(int id, int count)
         {
             var product = await productsService.GetProductById(id);
-            var cartId = await GetSetCartId();
+            var cartId = HttpContext.GetCartId();
             if (count > 0)
                 await cartService.ChangeItemCount(cartId, product, count);
             else
@@ -65,21 +66,10 @@ namespace Store.App.Controllers
         [HttpPost]
         public async Task<IActionResult> ClearCart()
         {
-            await cartService.ClearCart(await GetSetCartId());
+            await cartService.ClearCart(HttpContext.GetCartId());
             return RedirectToAction("Index", "Store");
         }
 
-        private async Task<int> GetSetCartId()
-        {
-            int id;
 
-            if (HttpContext.Request.Cookies.ContainsKey(CartCookieName))
-                id = int.Parse(HttpContext.Request.Cookies[CartCookieName]);
-            else
-                id = await cartService.CreateCart();
-
-            HttpContext.Response.Cookies.Append(CartCookieName, id.ToString());
-            return id;
-        }
     }
 }

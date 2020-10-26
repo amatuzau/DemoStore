@@ -233,7 +233,7 @@ namespace Store.DAL.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<int>("CartId")
+                    b.Property<int?>("CartId")
                         .HasColumnType("int");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -372,11 +372,9 @@ namespace Store.DAL.Migrations
 
             modelBuilder.Entity("Store.DAL.Models.StoreUser", b =>
                 {
-                    b.HasOne("Store.DAL.Models.Cart", "Type")
+                    b.HasOne("Store.DAL.Models.Cart", "Cart")
                         .WithMany()
-                        .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CartId");
                 });
 #pragma warning restore 612, 618
         }

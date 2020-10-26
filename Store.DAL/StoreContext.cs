@@ -4,7 +4,7 @@ using Store.DAL.Models;
 
 namespace Store.DAL
 {
-    public class StoreContext: DbContext
+    public class StoreContext: IdentityDbContext<StoreUser>
     {
         public StoreContext(DbContextOptions<StoreContext> options): base(options)
         {
@@ -19,7 +19,7 @@ namespace Store.DAL
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            
+
             modelBuilder.Entity<Category>().ToTable("Categories");
             modelBuilder.Entity<Product>().ToTable("Products");
             modelBuilder.Entity<Cart>().ToTable("Carts");
