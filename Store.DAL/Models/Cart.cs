@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Store.DAL.Models
 {
-    public class Cart: IEntity
+    public class Cart : IEntity
     {
         public int Id { get; set; }
-        public Dictionary<string, int> CartItems { get; } = new Dictionary<string, int>();
+
+        public ICollection<CartItem> CartItems { get; set; }
     }
 }

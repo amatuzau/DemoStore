@@ -1,84 +1,85 @@
-﻿using Store.DAL;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Store.App.Core;
+using Store.DAL;
 using Store.DAL.Models;
-using System;
 
 namespace Store.Core
 {
     public class CartService : ICartService
     {
-        private readonly IRepository<Cart> repository;
+        private readonly StoreContext context;
 
-        public CartService(IRepository<Cart> repository)
+        public CartService(StoreContext context)
         {
-            this.repository = repository;
+            this.context = context;
         }
 
-        public Cart FindCart(int id)
+        public async Task<Cart> FindCart(int id)
         {
-            return GetCart(id);
+            var cart = await GetCart(id);
+            return cart;
         }
 
-        public void AddItemToCart(int id, Product item, int count)
+        public async Task AddItemToCart(int id, Product item, int count)
         {
             if (count <= 0) throw new ArgumentException(nameof(count));
 
-            var cart = GetCart(id);
-            var stringId = item.Id.ToString();
-            if (cart.CartItems.ContainsKey(stringId))
-            {
-                cart.CartItems[stringId] += count;
-            }
+            var cart = await GetCart(id);
+            if (cart.CartItems.Any(ci => ci.ProductId == item.Id))
+                cart.CartItems.Single(ci => ci.ProductId == item.Id).Count += count;
             else
-            {
-                cart.CartItems.Add(stringId, count);
-            }
-            repository.SaveChangesAsync().Wait();
+                cart.CartItems.Add(new CartItem {ProductId = item.Id, Count = count});
+            context.Update(cart);
+            await context.SaveChangesAsync();
         }
 
-        public void ChangeItemCount(int id, Product item, int newCount)
+        private async Task<Cart> GetCart(int id)
         {
-            var cart = GetCart(id);
-            var stringId = item.Id.ToString();
-            if (cart.CartItems.ContainsKey(stringId))
-            {
-                cart.CartItems[stringId] = newCount;
-            } else
-            {
-                throw new ArgumentException(nameof(item));
-            }
-            repository.SaveChangesAsync().Wait();
-        }
-
-        public void RemoveItemFromCart(int id, Product item)
-        {
-            var cart = GetCart(id);
-            cart.CartItems.Remove(item.Id.ToString());
-            repository.SaveChangesAsync().Wait();
-        }
-
-        public void ClearCart(int id)
-        {
-            var cart = GetCart(id);
-            cart.CartItems.Clear();
-            repository.SaveChangesAsync().Wait();
-        }
-
-        public int CreateCart()
-        {
-            var id = repository.Add(new Cart());
-            repository.SaveChangesAsync().Wait();
-            return id;
-        }
-
-        private Cart GetCart(int id)
-        {
-            var cart = repository.Get(id);
-            if (cart == null)
-            {
-                cart = new Cart { Id = id };
-                repository.Add(cart);
-            }
+            var cart = await context.Carts
+                .Include(c => c.CartItems)
+                .ThenInclude(ci => ci.Product)
+                .SingleOrDefaultAsync(c => c.Id == id);
             return cart;
+        }
+
+        public async Task ChangeItemCount(int id, Product item, int newCount)
+        {
+            var cart = await GetCart(id);
+            if (cart.CartItems.Any(ci => ci.ProductId == item.Id))
+                cart.CartItems.Single(ci => ci.ProductId == item.Id).Count = newCount;
+            else
+                throw new ArgumentException(nameof(item));
+            context.Update(cart);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task RemoveItemFromCart(int id, Product item)
+        {
+            var cart = await GetCart(id);
+            var cartItem = cart.CartItems.SingleOrDefault(ci => ci.ProductId == item.Id);
+            if (cartItem == null) return;
+            cart.CartItems.Remove(cartItem);
+            context.Update(cart);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task ClearCart(int id)
+        {
+            var cart = await GetCart(id);
+            cart.CartItems.Clear();
+            context.Update(cart);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task<int> CreateCart()
+        {
+            var newCart = await context.Carts.AddAsync(new Cart());
+            await context.SaveChangesAsync();
+            return newCart.Entity.Id;
         }
     }
 }

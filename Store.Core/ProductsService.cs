@@ -1,36 +1,37 @@
-﻿using Store.DAL;
-using Store.DAL.Models;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Store.DAL;
+using Store.DAL.Models;
 
-namespace Store.Core
+namespace Store.App.Core
 {
     public class ProductsService : IProductsService
     {
-        private readonly IRepository<Category> categoriesRepo;
-        private readonly IRepository<Product> productsRepo;
+        private readonly StoreContext context;
 
-        public ProductsService(IRepository<Category> categoriesRepo, IRepository<Product> productsRepo)
+
+        public ProductsService(StoreContext context)
         {
-            this.categoriesRepo = categoriesRepo;
-            this.productsRepo = productsRepo;
+            this.context = context;
         }
 
-        public IEnumerable<Category> GetCategoriesWithProducts()
+        public async Task<IEnumerable<Category>> GetCategoriesWithProducts()
         {
-            return productsRepo.GetAll().Select(p => p.Category).Distinct();
+            var categories = context.Categories.Where(c => c.Products.Any());
+
+            return await categories.ToListAsync();
         }
 
-        public IEnumerable<Product> GetProducts()
+        public async Task<IEnumerable<Product>> GetProducts()
         {
-            return productsRepo.GetAll();
+            return await context.Products.ToListAsync();
         }
 
-        public Product GetProductById(int id)
+        public async Task<Product> GetProductById(int id)
         {
-            return productsRepo.Get(id);
+            return await context.Products.FindAsync(id);
         }
     }
 }

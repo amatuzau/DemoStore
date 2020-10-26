@@ -1,4 +1,4 @@
-﻿@model Store.Models.StoreViewModel
+﻿@model StoreViewModel
 
 @{
     ViewData["Title"] = "Catalog";
@@ -11,20 +11,21 @@
     <h2 class="pt-5">@category.Name</h2>
     <div class="container-fluid pt-3">
         <div class="row row-cols-4">
-            @foreach (var product in Model.Products.Where(p => p.Category == category))
+            @foreach (var product in Model.Products.Where(p => p.CategoryId == category.Id))
             {
                 <div class="col">
                     <div class="card text-center">
-                        <img src="~/img/@product.Image" alt="@product.Name" class="card-img-top img-fluid" />
+                        <img src="~/img/@product.Image" alt="@product.Name" class="card-img-top img-fluid"/>
                         <div class="card-body">
                             <h3>@product.Name</h3>
-                            <h2><b>$@product.Price</b></h2>
-                            @Html.ActionLink("Add to cart", "Add", "Cart", new { id = product.Id, count = 1 }, new { @class = "btn btn-primary" })
+                            <h2>
+                                <b>$@product.Price</b>
+                            </h2>
+                            @Html.ActionLink("Add to cart", "Add", "Cart", new {id = product.Id, count = 1}, new {@class = "btn btn-primary"})
                         </div>
                     </div>
                 </div>
             }
         </div>
     </div>
-
 }

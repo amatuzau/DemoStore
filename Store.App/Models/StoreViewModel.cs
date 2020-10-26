@@ -1,10 +1,6 @@
 ﻿using Store.DAL.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Store.Models
+namespace Store.App.Models
 {
     public class StoreViewModel
     {

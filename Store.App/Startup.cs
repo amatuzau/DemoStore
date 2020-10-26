@@ -1,19 +1,20 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
+using Store.App.Core;
 using Store.Core;
 using Store.DAL;
+using Store.DAL.Ado;
 using Store.DAL.Models;
-using DemoStore;
 
-namespace Store
+namespace Store.App
 {
     public class Startup
     {
@@ -28,11 +29,32 @@ namespace Store
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+
+            services.Configure<AdoOptions>(Configuration.GetSection(nameof(AdoOptions)));
+            
             services.AddScoped<IProductsService, ProductsService>();
             services.AddScoped<ICartService, CartService>();
-            services.AddScoped<IRepository<Category>, GenericFileRepository<Category>>();
-            services.AddScoped<IRepository<Product>, GenericFileRepository<Product>>();
-            services.AddScoped<IRepository<Cart>, GenericFileRepository<Cart>>();
+
+            var dataSource = Configuration.GetValue<string>("DataSource");
+            
+            switch (dataSource)
+            {
+                case "File":
+                    services.AddScoped(s => new UnitOfWork(@"d:/data"));
+                    break;
+                case "Ado":
+                    //services.AddScoped<IRepository<Category>, CategoriesAdoRepository>();
+                    //services.AddScoped<IRepository<Product>, ProductsAdoRepository>();
+                    //services.AddScoped<IRepository<Cart>, CartAdoRepository>();
+                    break;
+                case "EF":
+                    services.AddDbContext<StoreContext>(o =>
+                    {
+                        o.UseSqlServer(Configuration.GetConnectionString("StoreConnection"))
+                            .EnableSensitiveDataLogging();
+                    });
+                    break;
+            }
         }
 
 
@@ -55,13 +77,15 @@ namespace Store
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapRazorPages();
                 endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    "default",
+                    "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

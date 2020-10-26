@@ -1,15 +1,15 @@
-﻿using Store.DAL.Models;
-using System;
+﻿using System.Threading.Tasks;
+using Store.DAL.Models;
 
-namespace Store.Core
+namespace Store.App.Core
 {
     public interface ICartService
     {
-        void AddItemToCart(int id, Product item, int count);
-        void ChangeItemCount(int id, Product item, int newCount);
-        void ClearCart(int id);
-        Cart FindCart(int id);
-        void RemoveItemFromCart(int id, Product item);
-        int CreateCart();
+        Task AddItemToCart(int id, Product item, int count);
+        Task ChangeItemCount(int id, Product item, int newCount);
+        Task ClearCart(int id);
+        Task<Cart> FindCart(int id);
+        Task RemoveItemFromCart(int id, Product item);
+        Task<int> CreateCart();
     }
 }

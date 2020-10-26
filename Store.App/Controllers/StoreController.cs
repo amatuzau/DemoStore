@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Store.Models;
 using Microsoft.AspNetCore.Mvc;
-using Store.Core;
+using Store.App.Core;
+using Store.App.Models;
 
-namespace Store.Controllers
+namespace Store.App.Controllers
 {
     public class StoreController : Controller
     {
@@ -17,20 +15,20 @@ namespace Store.Controllers
             this.productsService = productsService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var model = new StoreViewModel
             {
-                Categories = productsService.GetCategoriesWithProducts().ToArray(),
-                Products = productsService.GetProducts().ToArray()
+                Categories = (await productsService.GetCategoriesWithProducts()).ToArray(),
+                Products = (await productsService.GetProducts()).ToArray()
             };
 
             return View(model);
         }
 
-        public IActionResult Buy([FromRoute] int id)
+        public async Task<IActionResult> Buy([FromRoute] int id)
         {
-            var product = productsService.GetProductById(id);
+            var product = await productsService.GetProductById(id);
             return View("Confirm", product);
         }
     }

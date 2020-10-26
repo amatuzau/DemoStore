@@ -1,4 +1,4 @@
-﻿@model IEnumerable<DemoStore.Models.CartViewModel>
+﻿@model IEnumerable<CartViewModel>
 
 @{
     ViewData["Title"] = "Index";
@@ -8,35 +8,43 @@
 
 <table class="table">
     <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.ProductName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Count)
-            </th>
-        </tr>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.ProductName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Count)
+        </th>
+    </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProductName)
-            </td>
-            <td>
-                <form method="post" asp-action="ChangeCount" class="form-inline">
-                    <input hidden name="id" value="@item.ProductId" />
-                    <input hidden name="count" value="@(item.Count - 1)" />
-                    <button type="submit" class="btn btn-light">-</button>
-                </form>
-                @Html.DisplayFor(modelItem => item.Count)
-                <form method="post" asp-action="ChangeCount" class="form-inline">
-                    <input hidden name="id" value="@item.ProductId" />
-                    <input hidden name="count" value="@(item.Count + 1)" />
-                    <button type="submit" class="btn btn-light">+</button>
-                </form>
-            </td>
-        </tr>
-}
+    @if (Model.Any())
+    {
+        foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductName)
+                </td>
+                <td>
+                    <form method="post" asp-action="ChangeCount" class="form-inline">
+                        <input hidden name="id" value="@item.ProductId"/>
+                        <input hidden name="count" value="@(item.Count - 1)"/>
+                        <button type="submit" class="btn btn-light">-</button>
+                    </form>
+                    @Html.DisplayFor(modelItem => item.Count)
+                    <form method="post" asp-action="ChangeCount" class="form-inline">
+                        <input hidden name="id" value="@item.ProductId"/>
+                        <input hidden name="count" value="@(item.Count + 1)"/>
+                        <button type="submit" class="btn btn-light">+</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    }
+    else
+    {
+        <td colspan="2">Cart is empty</td>
+    }
     </tbody>
 </table>

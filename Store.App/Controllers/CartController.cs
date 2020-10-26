@@ -1,16 +1,18 @@
-﻿using System;
-using System.Linq;
-using DemoStore.Models;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Store.Core;
+using Store.App.Core;
+using Store.App.Models;
 
-namespace DemoStore.Controllers
+namespace Store.App.Controllers
 {
+    [Authorize]
     public class CartController : Controller
     {
+        private const string CartCookieName = "DemoStore.CartId";
         private readonly ICartService cartService;
         private readonly IProductsService productsService;
-        private const string CartCookieName = "DemoStore.CartId";
 
         public CartController(ICartService cartService, IProductsService productsService)
         {
@@ -18,56 +20,66 @@ namespace DemoStore.Controllers
             this.productsService = productsService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var cart = cartService.FindCart(GetSetCartId());
-            var items = cart.CartItems.Select(i => new CartViewModel {
-                ProductId = int.Parse(i.Key),
-                ProductName = productsService.GetProductById(int.Parse(i.Key)).Name,
-                Count = i.Value });
+            var cartId = await GetSetCartId();
+            var cart = await cartService.FindCart(cartId);
+            var items = cart.CartItems.Select(ci => new CartViewModel
+            {
+                ProductId = ci.ProductId,
+                ProductName = ci.Product.Name,
+                Count = ci.Count
+            });
+
             return View(items);
         }
 
-        public IActionResult Add(int id, int count)
+        public async Task<IActionResult> Add(int id, int count)
         {
-            var product = productsService.GetProductById(id);
-            cartService.AddItemToCart(GetSetCartId(), product, count);
+            var product = await productsService.GetProductById(id);
+            await cartService.AddItemToCart(await GetSetCartId(), product, count);
             return RedirectToAction("Index", "Store");
         }
 
         [HttpPost]
-        public IActionResult Remove(int id)
+        public async Task<IActionResult> Remove(int id)
         {
-            var product = productsService.GetProductById(id);
-            cartService.RemoveItemFromCart(GetSetCartId(), product);
+            var product = await productsService.GetProductById(id);
+            await cartService.RemoveItemFromCart(await GetSetCartId(), product);
             return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public IActionResult ChangeCount(int id, int count)
+        public async Task<IActionResult> ChangeCount(int id, int count)
         {
-            var product = productsService.GetProductById(id);
-            cartService.ChangeItemCount(GetSetCartId(), product, count);
+            var product = await productsService.GetProductById(id);
+            var cartId = await GetSetCartId();
+            if (count > 0)
+                await cartService.ChangeItemCount(cartId, product, count);
+            else
+                await cartService.RemoveItemFromCart(cartId, product);
+
             return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public IActionResult ClearCart()
+        public async Task<IActionResult> ClearCart()
         {
-            cartService.ClearCart(GetSetCartId());
+            await cartService.ClearCart(await GetSetCartId());
             return RedirectToAction("Index", "Store");
         }
-        private int GetSetCartId()
+
+        private async Task<int> GetSetCartId()
         {
+            int id;
+
             if (HttpContext.Request.Cookies.ContainsKey(CartCookieName))
-            {
-                return int.Parse(HttpContext.Request.Cookies[CartCookieName]);
-            } else
-            {
-                var id = cartService.CreateCart();
-                HttpContext.Response.Cookies.Append(CartCookieName, id.ToString());
-                return id;
-            }
+                id = int.Parse(HttpContext.Request.Cookies[CartCookieName]);
+            else
+                id = await cartService.CreateCart();
+
+            HttpContext.Response.Cookies.Append(CartCookieName, id.ToString());
+            return id;
         }
     }
 }
