@@ -1,0 +1,11 @@
+﻿@model Store.DAL.Models.Product
+@{
+    ViewData["Title"] = "Confirm";
+}
+
+<div class="jumbotron">
+    <h1>You are about to buy</h1>
+    <img src="~/img/@Model.Image" alt="@Model.Name" class="img-thumbnail"/>
+    <h3>@Model.Name for $@Model.Price</h3>
+    <a class="btn btn-primary btn-lg" href="#" role="button">Confirm</a>
+</div>
