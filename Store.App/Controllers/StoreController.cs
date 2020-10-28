@@ -9,6 +9,7 @@ using Store.App.Models;
 using Store.DAL.Models;
 using FluentValidation;
 using System.IO;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Store.App.Controllers
 {
@@ -43,14 +44,22 @@ namespace Store.App.Controllers
             return View(model);
         }
 
+        public async Task<IActionResult> Index2()
+        {
+            var categories = await productsService.GetCategoriesWithProducts();
+            return View(categories);
+        }
+
         public async Task<IActionResult> Buy([FromRoute] int id)
         {
             var product = await productsService.GetProductById(id);
             return View("Confirm", product);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var list = new SelectList(await productsService.GetCategories(), "Id", "Name");
+            ViewBag.Categories = list;
             return View("ProductCreateEdit");
         }
 
@@ -69,26 +78,5 @@ namespace Store.App.Controllers
         }
     }
 
-    public class ProductValidator: AbstractValidator<ProductCreateEditModel>
-    {
-        public ProductValidator()
-        {
-            RuleFor(p => p.Category).NotEmpty().MinimumLength(3).WithMessage("Invalid category");
-            RuleFor(p => p.Price).GreaterThanOrEqualTo(1000).When(p => p.Name.StartsWith("Iphone"));
-            //RuleFor(p => p.Image).Must(i => Path.GetExtension(i.FileName) == "jpg").WithMessage("JPG only");
-            RuleFor(p => p.Manufactorer).SetValidator(new ManufactorerValidator());
-            RuleForEach(p => p.Tags).ChildRules(s =>
-            {
-                s.RuleFor(s1 => s1.Length).LessThan(10);
-            });
-        }
-    }
 
-    public class ManufactorerValidator: AbstractValidator<Manufactorer>
-    {
-        public ManufactorerValidator()
-        {
-            RuleFor(m => m.Name).NotEmpty();
-        }
-    }
 }

@@ -11,5 +11,6 @@ namespace Store.App.Core
         Task<Product> GetProductById(int id);
         Task<IEnumerable<Product>> GetProducts();
         IQueryable<Product> GetProductsFilteredByPrice(decimal price);
+        Task<IEnumerable<Category>> GetCategories();
     }
 }

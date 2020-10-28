@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Store.DAL;
@@ -15,7 +16,9 @@ namespace Store.App
             using var scope = host.Services.CreateScope();
             var services = scope.ServiceProvider;
             var context = services.GetRequiredService<StoreContext>();
-            var seeder = new DataSeeder(context);
+            var userManager = services.GetRequiredService<UserManager<StoreUser>>();
+            var roleManager = services.GetRequiredService <RoleManager<IdentityRole>>();
+            var seeder = new DataSeeder(context, userManager, roleManager);
             await seeder.SeedDataAsync();
             await host.RunAsync();
         }

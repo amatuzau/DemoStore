@@ -18,6 +18,11 @@ namespace Store.App.Core
             this.context = context;
         }
 
+        public async Task<IEnumerable<Category>> GetCategories()
+        {
+            return await context.Categories.ToArrayAsync();
+        }
+
         public async Task<IEnumerable<Category>> GetCategoriesWithProducts()
         {
             var categories = context.Categories.Where(c => c.Products.Any());

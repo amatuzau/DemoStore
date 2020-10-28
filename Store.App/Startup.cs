@@ -15,6 +15,13 @@ using Microsoft.AspNetCore.Identity;
 using System;
 using Microsoft.AspNetCore.Antiforgery;
 using FluentValidation.AspNetCore;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+using System.IO;
+using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
+using Store.App.Filters;
+using WebApiContrib.Core.Formatter.Csv;
 
 namespace Store.App
 {
@@ -30,7 +37,16 @@ namespace Store.App
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().AddFluentValidation(f => f.RegisterValidatorsFromAssemblyContaining<Startup>());
+            services.AddMvc()
+                .AddFluentValidation(f => f.RegisterValidatorsFromAssemblyContaining<Startup>())
+                .AddXmlDataContractSerializerFormatters()
+                .AddCsvSerializerFormatters()
+                .AddMvcOptions(opts =>
+                {
+                    // opts.Filters.Add(typeof(CacheFilterAttribute));
+                    opts.FormatterMappings.SetMediaTypeMappingForFormat("xml", new MediaTypeHeaderValue("application/xml"));
+                });
+            services.AddScoped<CacheFilterAttribute>();
 
             services.Configure<AdoOptions>(Configuration.GetSection(nameof(AdoOptions)));
             
@@ -59,7 +75,7 @@ namespace Store.App
                     break;
             }
 
-            services.AddDefaultIdentity<StoreUser>().AddEntityFrameworkStores<StoreContext>();
+            services.AddDefaultIdentity<StoreUser>().AddRoles<IdentityRole>().AddEntityFrameworkStores<StoreContext>();
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -99,6 +115,14 @@ namespace Store.App
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
                 options.SlidingExpiration = true;
             });
+
+            services.AddSwaggerGen(c => {
+                var file = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var path = Path.Combine(AppContext.BaseDirectory, file);
+                c.IncludeXmlComments(path);
+            });
+
+            services.AddMemoryCache();
         }
 
 
@@ -119,10 +143,16 @@ namespace Store.App
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseSwagger();
+
             app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseSwaggerUI(c => {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "DemoStore API v1");
+            });
 
             app.UseMiddleware<CartIdHandler>();
 
@@ -132,6 +162,7 @@ namespace Store.App
                 endpoints.MapControllerRoute(
                     "default",
                     "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllers();
             });
         }
     }

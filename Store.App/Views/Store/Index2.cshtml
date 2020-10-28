@@ -1,0 +1,23 @@
+﻿@model IEnumerable<Store.DAL.Models.Category>
+
+@{
+    ViewData["Title"] = "Catalog";
+}
+
+<select onchange="getProducts(this.options[this.selectedIndex].value)">
+    @foreach (var category in Model)
+    {
+        <option value="@category.Id">@category.Name</option>
+    }
+</select>
+
+<table>
+    <thead>
+    <tr>
+        <td>Id</td>
+        <td>Name</td>
+        <td>Price</td>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
