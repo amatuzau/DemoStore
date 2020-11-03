@@ -26,22 +26,8 @@ namespace Store.App.Controllers
 
         public async Task<IActionResult> Index(decimal price = 0, int page = 0, int pageSize = 10)
         {
-            IEnumerable<Product> products;
-
-            if (price > 0) {
-                products = productsService.GetProductsFilteredByPrice(price).Skip(pageSize * page).Take(pageSize);
-            } else
-            {
-                products = (await productsService.GetProducts()).Skip(pageSize * page).Take(pageSize);
-            }
-
-            var model = new StoreViewModel
-            {
-                Categories = (await productsService.GetCategoriesWithProducts()).ToArray(),
-                Products = products.ToArray()
-            };
-
-            return View(model);
+            var categories = await productsService.GetCategoriesWithProducts();
+            return View(categories);
         }
 
         public async Task<IActionResult> Index2()

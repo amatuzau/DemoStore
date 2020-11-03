@@ -1,4 +1,4 @@
-﻿@model StoreViewModel
+﻿@model IEnumerable<Store.DAL.Models.Category>
 
 @{
     ViewData["Title"] = "Catalog";
@@ -6,26 +6,44 @@
 
 <h1>Welcome to Demo Store</h1>
 
-@foreach (var category in Model.Categories)
+<select id="category">
+    @foreach (var category in Model)
+    {
+        <option value="@category.Id">@category.Name</option>
+    }
+</select>
+
+<div class="container-fluid pt-3">
+    <div id="items" class="row row-cols-4">
+    </div>
+</div>
+
+@section Scripts
 {
-    <h2 class="pt-5">@category.Name</h2>
-    <div class="container-fluid pt-3">
-        <div class="row row-cols-4">
-            @foreach (var product in Model.Products.Where(p => p.CategoryId == category.Id))
-            {
-                <div class="col">
+    <script>
+    function createItem(item){
+        return `<div class="col">
                     <div class="card text-center">
-                        <img src="~/img/@product.Image" alt="@product.Name" class="card-img-top img-fluid"/>
+                        <img src="/img/${item.image}" alt="${item.name}" class="card-img-top img-fluid"/>
                         <div class="card-body">
-                            <h3>@product.Name</h3>
+                            <h3>${item.name}</h3>
                             <h2>
-                                <b>$@product.Price</b>
+                                <b>${item.price}</b>
                             </h2>
-                            @Html.ActionLink("Add to cart", "Add", "Cart", new {id = product.Id, count = 1}, new {@class = "btn btn-primary"})
+                            <a href="#">Add to cart</a>
                         </div>
                     </div>
-                </div>
-            }
-        </div>
-    </div>
+                </div>`;
+    }
+    
+    $(document).ready(function() {
+        $("#category").on('change', function(){
+            $.get(`/api/v1/categories/${this.value}/products`, function(data){
+                data.forEach(item => {
+                        $("#items").append(createItem(item));
+                    });
+            });
+        });
+    });
+</script>
 }
