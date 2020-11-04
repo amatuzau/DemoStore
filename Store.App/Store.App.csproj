@@ -10,12 +10,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="9.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.9" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.9" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Xml" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.9">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -31,18 +33,29 @@
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="3.1.9" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.8" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.4" />
+    <PackageReference Include="Scrutor" Version="3.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
     <PackageReference Include="WebApiContrib.Core.Formatter.Csv" Version="3.0.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\Api\Models" />
-    <Folder Include="Controllers\Api\Models\" />
     <Folder Include="wwwroot\img\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Store.Core\Store.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Client\css\site.css" />
+    <Content Include="Client\js\site.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\dist\cartIndex.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\dist\cartIndex.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\dist\cartIndex.entry.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\dist\cartIndex.entry.js.map" />
   </ItemGroup>
 
 </Project>

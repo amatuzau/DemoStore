@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Store.App.Core;
 using Store.App.Models;
+using Store.Core;
 
 namespace Store.App.Controllers
 {

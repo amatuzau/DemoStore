@@ -1,21 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bogus.DataSets;
 using Microsoft.EntityFrameworkCore;
+using Store.Core.Queries;
 using Store.DAL;
 using Store.DAL.Models;
 
-namespace Store.App.Core
+namespace Store.Core
 {
     public class ProductsService : IProductsService
     {
         private readonly StoreContext context;
+        private readonly ISortingProvider<Product> sortingProvider;
 
-
-        public ProductsService(StoreContext context)
+        public ProductsService(StoreContext context, ISortingProvider<Product> sortingProvider)
         {
             this.context = context;
+            this.sortingProvider = sortingProvider;
         }
 
         public async Task<IEnumerable<Category>> GetCategories()
@@ -30,9 +31,23 @@ namespace Store.App.Core
             return await categories.ToListAsync();
         }
 
-        public async Task<IEnumerable<Product>> GetProducts()
+        public async Task<PagedResult<Product>> GetProducts(ProductQuery query)
         {
-            return await context.Products.ToListAsync();
+            var queryable = context.Products.AsQueryable();
+
+            if (query.Categories != null)
+            {
+                queryable = queryable.Where(p => query.Categories.Contains(p.CategoryId));
+            }
+
+            var count = await queryable.CountAsync();
+
+            queryable = sortingProvider.ApplySorting(queryable, query);
+            queryable = queryable.ApplyPagination(query);
+            
+            var items = await queryable.ToListAsync();
+
+            return new PagedResult<Product>{TotalCount = count, Items = items};
         }
 
         public IQueryable<Product> GetProductsFilteredByPrice(decimal price)

@@ -1,26 +1,26 @@
+using System;
+using System.IO;
+using System.Reflection;
+using System.Text.Json.Serialization;
+using AutoMapper;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
+using Microsoft.Net.Http.Headers;
 using Store.App.Core;
+using Store.App.Filters;
+using Store.App.Mapper;
 using Store.Core;
+using Store.Core.Queries;
 using Store.DAL;
 using Store.DAL.Ado;
 using Store.DAL.Models;
-using Microsoft.AspNetCore.Identity;
-using System;
-using Microsoft.AspNetCore.Antiforgery;
-using FluentValidation.AspNetCore;
-using Microsoft.OpenApi.Models;
-using System.Reflection;
-using System.IO;
-using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
-using Store.App.Filters;
 using WebApiContrib.Core.Formatter.Csv;
 
 namespace Store.App
@@ -44,18 +44,22 @@ namespace Store.App
                 .AddMvcOptions(opts =>
                 {
                     // opts.Filters.Add(typeof(CacheFilterAttribute));
-                    opts.FormatterMappings.SetMediaTypeMappingForFormat("xml", new MediaTypeHeaderValue("application/xml"));
-                });
+                    opts.FormatterMappings.SetMediaTypeMappingForFormat("xml",
+                        new MediaTypeHeaderValue("application/xml"));
+                })
+                .AddJsonOptions(opts => opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+                .AddRazorRuntimeCompilation();
+
             services.AddScoped<CacheFilterAttribute>();
 
             services.Configure<AdoOptions>(Configuration.GetSection(nameof(AdoOptions)));
-            
+
             services.AddScoped<IProductsService, ProductsService>();
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<CartIdHandler>();
 
             var dataSource = Configuration.GetValue<string>("DataSource");
-            
+
             switch (dataSource)
             {
                 case "File":
@@ -94,7 +98,7 @@ namespace Store.App
 
                 // User settings.
                 options.User.AllowedUserNameCharacters =
-                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
                 options.User.RequireUniqueEmail = false;
             });
 
@@ -116,13 +120,22 @@ namespace Store.App
                 options.SlidingExpiration = true;
             });
 
-            services.AddSwaggerGen(c => {
+            services.AddSwaggerGen(c =>
+            {
                 var file = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var path = Path.Combine(AppContext.BaseDirectory, file);
                 c.IncludeXmlComments(path);
             });
 
             services.AddMemoryCache();
+
+            services.AddAutoMapper(typeof(MappingProfile));
+
+            services.Scan(scan => scan
+                .FromAssemblyOf<BaseQuery>()
+                .AddClasses(c => c.AssignableTo(typeof(ISortingProvider<>)))
+                .AsImplementedInterfaces()
+                .WithScopedLifetime());
         }
 
 
@@ -150,9 +163,7 @@ namespace Store.App
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseSwaggerUI(c => {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "DemoStore API v1");
-            });
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "DemoStore API v1"); });
 
             app.UseMiddleware<CartIdHandler>();
 

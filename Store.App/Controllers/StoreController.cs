@@ -10,6 +10,7 @@ using Store.DAL.Models;
 using FluentValidation;
 using System.IO;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Store.Core;
 
 namespace Store.App.Controllers
 {
@@ -25,12 +26,6 @@ namespace Store.App.Controllers
         }
 
         public async Task<IActionResult> Index(decimal price = 0, int page = 0, int pageSize = 10)
-        {
-            var categories = await productsService.GetCategoriesWithProducts();
-            return View(categories);
-        }
-
-        public async Task<IActionResult> Index2()
         {
             var categories = await productsService.GetCategoriesWithProducts();
             return View(categories);
