@@ -1,0 +1,10 @@
+﻿.header {
+    background-color: gold;
+}
+
+.header {
+    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    align-items: center;
+}
