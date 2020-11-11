@@ -10,6 +10,7 @@
 
 .categories, .filters, .items {
     background-color: gold;
+    padding: 20px;
 }
 
 .categories {
