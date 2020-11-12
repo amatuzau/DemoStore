@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -136,6 +137,11 @@ namespace Store.App
                 .AddClasses(c => c.AssignableTo(typeof(ISortingProvider<>)))
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
+
+            services.AddSpaStaticFiles(config =>
+            {
+                config.RootPath = "ClientApp/build";
+            });
         }
 
 
@@ -155,6 +161,7 @@ namespace Store.App
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseSpaStaticFiles();
 
             app.UseSwagger();
 
@@ -174,6 +181,16 @@ namespace Store.App
                     "default",
                     "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllers();
+            });
+
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "ClientApp";
+
+                if (env.IsDevelopment())
+                {
+                    spa.UseReactDevelopmentServer("start");
+                }
             });
         }
     }
