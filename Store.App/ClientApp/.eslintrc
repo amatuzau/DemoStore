@@ -1,7 +1,7 @@
 ﻿{
   "extends": [
+    "eslint:recommended",
     "react-app",
-    "airbnb",
     "plugin:jsx-a11y/recommended",
     "prettier",
     "prettier/react"
@@ -18,16 +18,6 @@
           ".js",
           ".jsx"
         ]
-      }
-    ],
-    "jsx-a11y/label-has-associated-control": [
-      "error",
-      {
-        "labelComponents": [],
-        "labelAttributes": [],
-        "controlComponents": [],
-        "assert": "either",
-        "depth": 25
       }
     ]
   }

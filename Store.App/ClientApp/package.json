@@ -17,7 +17,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint ."
+    "lint": "eslint **/*.js **/*.jsx"
   },
   "eslintConfig": {
     "extends": [
@@ -38,7 +38,9 @@
     ]
   },
   "devDependencies": {
+    "eslint": "^7.13.0",
     "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-google": "^0.14.0",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-prettier": "^3.1.4",
