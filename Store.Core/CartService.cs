@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -24,15 +23,22 @@ namespace Store.Core
             return cart;
         }
 
-        public async Task AddItemToCart(int id, Product item, int count)
+        public async Task<Cart> FindCartByUserId(string userId)
+        {
+            var user = await context.Users.FindAsync(userId);
+            var cart = await GetCart(user.CartId);
+            return cart;
+        }
+
+        public async Task AddItemToCart(int id, int productId, int count)
         {
             if (count <= 0) throw new ArgumentException(nameof(count));
 
             var cart = await GetCart(id);
-            if (cart.CartItems.Any(ci => ci.ProductId == item.Id))
-                cart.CartItems.Single(ci => ci.ProductId == item.Id).Count += count;
+            if (cart.CartItems.Any(ci => ci.ProductId == productId))
+                cart.CartItems.Single(ci => ci.ProductId == productId).Count += count;
             else
-                cart.CartItems.Add(new CartItem {ProductId = item.Id, Count = count});
+                cart.CartItems.Add(new CartItem {ProductId = productId, Count = count});
             context.Update(cart);
             await context.SaveChangesAsync();
         }
@@ -43,24 +49,41 @@ namespace Store.Core
                 .Include(c => c.CartItems)
                 .ThenInclude(ci => ci.Product)
                 .SingleOrDefaultAsync(c => c.Id == id);
+
+            if (cart != null && cart.CartItems.Any())
+            {
+                cart.Total = cart.CartItems.Select(c => c.Product.Price * c.Count).Sum();
+            }
+
             return cart;
         }
 
-        public async Task ChangeItemCount(int id, Product item, int newCount)
+        public async Task ChangeItemCount(int id, int productId, int newCount)
         {
             var cart = await GetCart(id);
-            if (cart.CartItems.Any(ci => ci.ProductId == item.Id))
-                cart.CartItems.Single(ci => ci.ProductId == item.Id).Count = newCount;
+            if (cart.CartItems.Any(ci => ci.ProductId == productId))
+            {
+                if (newCount == 0)
+                {
+                    var cartItem = cart.CartItems.SingleOrDefault(ci => ci.ProductId == productId);
+                    if (cartItem == null) return;
+                    cart.CartItems.Remove(cartItem);
+                }
+                else
+                {
+                    cart.CartItems.Single(ci => ci.ProductId == productId).Count = newCount;
+                }
+            }
             else
-                throw new ArgumentException(nameof(item));
+                throw new ArgumentException(nameof(productId));
             context.Update(cart);
             await context.SaveChangesAsync();
         }
 
-        public async Task RemoveItemFromCart(int id, Product item)
+        public async Task RemoveItemFromCart(int id, int productId)
         {
             var cart = await GetCart(id);
-            var cartItem = cart.CartItems.SingleOrDefault(ci => ci.ProductId == item.Id);
+            var cartItem = cart.CartItems.SingleOrDefault(ci => ci.ProductId == productId);
             if (cartItem == null) return;
             cart.CartItems.Remove(cartItem);
             context.Update(cart);

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -24,14 +23,15 @@ namespace Store.App.Controllers.Api
         }
 
         /// <summary>
-        /// Get all categories
+        ///     Get all categories
         /// </summary>
         /// <returns>List of categories</returns>
         [HttpGet]
         [ServiceFilter(typeof(CacheFilterAttribute))]
-        public async Task<IEnumerable<Category>> GetCategories()
+        [ProducesResponseType(typeof(ICollection<Category>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetCategories()
         {
-            return await context.Categories.ToListAsync();
+            return Ok(await context.Categories.ToListAsync());
         }
 
         // GET: api/Categories/5
@@ -40,10 +40,7 @@ namespace Store.App.Controllers.Api
         {
             var category = await context.Categories.FindAsync(id);
 
-            if (category == null)
-            {
-                return NotFound();
-            }
+            if (category == null) return NotFound();
 
             return category;
         }
@@ -54,10 +51,7 @@ namespace Store.App.Controllers.Api
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCategory(int id, Category category)
         {
-            if (id != category.Id)
-            {
-                return BadRequest();
-            }
+            if (id != category.Id) return BadRequest();
 
             context.Entry(category).State = EntityState.Modified;
 
@@ -68,13 +62,8 @@ namespace Store.App.Controllers.Api
             catch (DbUpdateConcurrencyException)
             {
                 if (!CategoryExists(id))
-                {
                     return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
 
             return NoContent();
@@ -91,7 +80,7 @@ namespace Store.App.Controllers.Api
             context.Categories.Add(category);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCategory", new { id = category.Id }, category);
+            return CreatedAtAction("GetCategory", new {id = category.Id}, category);
         }
 
         // DELETE: api/Categories/5
@@ -99,10 +88,7 @@ namespace Store.App.Controllers.Api
         public async Task<ActionResult<Category>> DeleteCategory(int id)
         {
             var category = await context.Categories.FindAsync(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
+            if (category == null) return NotFound();
 
             context.Categories.Remove(category);
             await context.SaveChangesAsync();

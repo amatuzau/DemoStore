@@ -84,6 +84,19 @@ namespace Store.App.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
+                    var user = await _userManager.FindByEmailAsync(Input.Email);
+                    if (HttpContext.Request.Cookies.ContainsKey(Constants.CartCookieName))
+                    {
+                        var id = int.Parse(HttpContext.Request.Cookies[Constants.CartCookieName]);
+                        if (id != user.CartId)
+                        {
+                            HttpContext.Response.Cookies.Append(Constants.CartCookieName, user.CartId.ToString());
+                        }
+                    }
+                    else
+                    {
+                        HttpContext.Response.Cookies.Append(Constants.CartCookieName, user.CartId.ToString());
+                    }
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)

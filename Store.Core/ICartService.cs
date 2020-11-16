@@ -5,11 +5,12 @@ namespace Store.App.Core
 {
     public interface ICartService
     {
-        Task AddItemToCart(int id, Product item, int count);
-        Task ChangeItemCount(int id, Product item, int newCount);
+        Task AddItemToCart(int id, int productId, int count);
+        Task ChangeItemCount(int id, int productId, int newCount);
         Task ClearCart(int id);
         Task<Cart> FindCart(int id);
-        Task RemoveItemFromCart(int id, Product item);
+        Task RemoveItemFromCart(int id, int productId);
         Task<int> CreateCart();
+        Task<Cart> FindCartByUserId(string userId);
     }
 }

@@ -38,28 +38,23 @@ namespace Store.App.Controllers
 
         public async Task<IActionResult> Add(int id, int count)
         {
-            var product = await productsService.GetProductById(id);
-            await cartService.AddItemToCart(HttpContext.GetCartId(), product, count);
+            await cartService.AddItemToCart(HttpContext.GetCartId(), id, count);
             return RedirectToAction("Index", "Store");
         }
 
         [HttpPost]
-        public async Task<IActionResult> Remove(int id)
+        public async Task<IActionResult> Remove(int productId)
         {
-            var product = await productsService.GetProductById(id);
-            await cartService.RemoveItemFromCart(HttpContext.GetCartId(), product);
+            await cartService.RemoveItemFromCart(HttpContext.GetCartId(), productId);
             return RedirectToAction("Index");
         }
 
         [HttpPost]
         public async Task<IActionResult> ChangeCount(int id, int count)
         {
-            var product = await productsService.GetProductById(id);
             var cartId = HttpContext.GetCartId();
             if (count > 0)
-                await cartService.ChangeItemCount(cartId, product, count);
-            else
-                await cartService.RemoveItemFromCart(cartId, product);
+                await cartService.ChangeItemCount(cartId, id, count);
 
             return RedirectToAction("Index");
         }
