@@ -19,16 +19,10 @@ const App = (props) => {
         <Switch>
           <Route path="/" exact render={() => <Redirect to={CATALOG_PATH} />} />
           <Route path={CATALOG_PATH}>
-            <Catalog
-              categories={props.state.categories}
-              products={props.state.products}
-              selectedCategories={props.state.selectedCategories}
-              onCategoryChange={props.onCategoryChange}
-              clearSelectedCategories={props.clearSelectedCategories}
-            />
+            <Catalog state={props.state.catalog} dispatch={props.dispatch} />
           </Route>
           <Route path={CART_PATH}>
-            <Cart />
+            <Cart state={props.state.cart}/>
           </Route>
         </Switch>
       </div>
