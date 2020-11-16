@@ -2,7 +2,7 @@
 
 namespace Store.DAL.Models
 {
-    public class Category : IEntity
+    public class Category
     {
         public int Id { get; set; }
         public string Name { get; set; }

@@ -20,7 +20,6 @@ using Store.App.Mapper;
 using Store.Core;
 using Store.Core.Queries;
 using Store.DAL;
-using Store.DAL.Ado;
 using Store.DAL.Models;
 using WebApiContrib.Core.Formatter.Csv;
 
@@ -53,32 +52,15 @@ namespace Store.App
 
             services.AddScoped<CacheFilterAttribute>();
 
-            services.Configure<AdoOptions>(Configuration.GetSection(nameof(AdoOptions)));
-
             services.AddScoped<IProductsService, ProductsService>();
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<CartIdHandler>();
 
-            var dataSource = Configuration.GetValue<string>("DataSource");
-
-            switch (dataSource)
+            services.AddDbContext<StoreContext>(o =>
             {
-                case "File":
-                    services.AddScoped(s => new UnitOfWork(@"d:/data"));
-                    break;
-                case "Ado":
-                    //services.AddScoped<IRepository<Category>, CategoriesAdoRepository>();
-                    //services.AddScoped<IRepository<Product>, ProductsAdoRepository>();
-                    //services.AddScoped<IRepository<Cart>, CartAdoRepository>();
-                    break;
-                case "EF":
-                    services.AddDbContext<StoreContext>(o =>
-                    {
-                        o.UseSqlServer(Configuration.GetConnectionString("StoreConnection"))
-                            .EnableSensitiveDataLogging();
-                    });
-                    break;
-            }
+                o.UseSqlServer(Configuration.GetConnectionString("StoreConnection"))
+                    .EnableSensitiveDataLogging();
+            });
 
             services.AddDefaultIdentity<StoreUser>().AddRoles<IdentityRole>().AddEntityFrameworkStores<StoreContext>();
 
