@@ -1,9 +1,9 @@
 import React from "react";
 import Category from "../Category/Category";
 
-class Categories extends React.Component {
-  createItems = () => {
-    const { categories, selectedCategories, onCategoryChange } = this.props;
+const Categories = (props) => {
+  const createItems = () => {
+    const { categories, selectedCategories, onCategoryChange } = props;
 
     return categories.map((category) => {
       const selected = selectedCategories.indexOf(category.id) >= 0;
@@ -18,23 +18,21 @@ class Categories extends React.Component {
     });
   };
 
-  handleClear = () => {
-    const { clearSelectedCategories } = this.props;
+  const handleClear = () => {
+    const { clearSelectedCategories } = props;
     clearSelectedCategories();
   };
 
-  render() {
-    return (
+  return (
+    <div>
       <div>
-        <div>
-          <button className=".clear" onClick={this.handleClear}>
-            Clear
-          </button>
-        </div>
-        {this.createItems()}
+        <button className=".clear" onClick={handleClear}>
+          Clear
+        </button>
       </div>
-    );
-  }
-}
+      {createItems()}
+    </div>
+  );
+};
 
 export default Categories;

@@ -1,41 +1,40 @@
-﻿import React from "react";
-import {
-  changeCategoryActionCreator,
-  clearCategoriesActionCreator,
-} from '../../redux/catalog-reducer';
+﻿import React, { Component } from "react";
 import CatalogItems from "../CatalogItems/CatalogItems";
 import Categories from "../Categories/Categories";
 import Filter from "../Filter/Filter";
 import style from "./Catalog.module.css";
 
-const Catalog = (props) => {
-
-  const onCategoryChange = (id, value) => {
-    props.dispatch(changeCategoryActionCreator(id, value));
+class Catalog extends Component {
+  componentDidMount() {
+    this.props.loadProducts();
   }
 
-  const clearSelectedCategories = () => {
-    props.dispatch(clearCategoriesActionCreator());
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.selectedCategories !== this.props.selectedCategories) {
+      this.props.loadProducts();
+    }
   }
 
-  return (
-    <div className={style.catalog}>
-      <div className={style.categories}>
-        <Categories
-          categories={props.state.categories}
-          selectedCategories={props.state.selectedCategories}
-          onCategoryChange={onCategoryChange}
-          clearSelectedCategories={clearSelectedCategories}
-        />
+  render() {
+    return (
+      <div className={style.catalog}>
+        <div className={style.categories}>
+          <Categories
+            categories={this.props.categories}
+            selectedCategories={this.props.selectedCategories}
+            onCategoryChange={this.props.onCategoryChange}
+            clearSelectedCategories={this.props.clearSelectedCategories}
+          />
+        </div>
+        <div className={style.filters}>
+          <Filter />
+        </div>
+        <div className={style.items}>
+          <CatalogItems products={this.props.products} />
+        </div>
       </div>
-      <div className={style.filters}>
-        <Filter />
-      </div>
-      <div className={style.items}>
-        <CatalogItems products={props.state.products} />
-      </div>
-    </div>
-  );
-};
+    );
+  }
+}
 
 export default Catalog;

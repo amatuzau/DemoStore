@@ -22,7 +22,7 @@ const Filter = () => {
       <label>
         Page size
         <select>
-          <option defaultValue>5</option>
+          <option>5</option>
           <option>10</option>
           <option>20</option>
         </select>
