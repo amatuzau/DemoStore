@@ -1,17 +1,20 @@
 ﻿import React, { Component } from "react";
+import { connect } from "react-redux";
+import { getProducts } from "../../redux/catalog-reducer";
 import CatalogItems from "../CatalogItems/CatalogItems";
 import Categories from "../Categories/Categories";
 import Filter from "../Filter/Filter";
+import Preloader from "../Preloader/Preloader";
 import style from "./Catalog.module.css";
 
 class Catalog extends Component {
   componentDidMount() {
-    this.props.loadProducts();
+    this.props.getProducts(this.props.filters);
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevProps.selectedCategories !== this.props.selectedCategories) {
-      this.props.loadProducts();
+    if (prevProps.filters.categories !== this.props.filters.categories) {
+      this.props.getProducts(this.props.filters);
     }
   }
 
@@ -21,7 +24,7 @@ class Catalog extends Component {
         <div className={style.categories}>
           <Categories
             categories={this.props.categories}
-            selectedCategories={this.props.selectedCategories}
+            selectedCategories={this.props.filters.categories}
             onCategoryChange={this.props.onCategoryChange}
             clearSelectedCategories={this.props.clearSelectedCategories}
           />
@@ -30,11 +33,25 @@ class Catalog extends Component {
           <Filter />
         </div>
         <div className={style.items}>
-          <CatalogItems products={this.props.products} />
+          {this.props.isLoading ? (
+            <Preloader />
+          ) : (
+            <CatalogItems products={this.props.products} />
+          )}
         </div>
       </div>
     );
   }
 }
 
-export default Catalog;
+const mapStateToProps = (state) => {
+  return {
+    products: state.catalog.products,
+    filters: state.catalog.filters,
+    isLoading: state.catalog.isLoading,
+  };
+};
+
+export default connect(mapStateToProps, {
+  getProducts,
+})(Catalog);

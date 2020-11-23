@@ -6,7 +6,7 @@ const CatalogItems = (props) => {
     return (
       <div className={styles.card}>
         <div className={styles.image}>
-          <img alt="" src={p.image} />
+          <img alt="" src={`/img/${p.image}`} />
         </div>
         <div className="description">
           <span className={styles.name}>{p.name}</span>

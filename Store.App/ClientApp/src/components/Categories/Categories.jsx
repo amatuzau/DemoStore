@@ -1,12 +1,23 @@
-import React from "react";
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import {
+  changeCategoryActionCreator,
+  clearCategoriesActionCreator,
+  getCategories,
+} from "../../redux/catalog-reducer";
 import Category from "../Category/Category";
+import Preloader from "../Preloader/Preloader";
 
-const Categories = (props) => {
-  const createItems = () => {
-    const { categories, selectedCategories, onCategoryChange } = props;
+class Categories extends Component {
+  componentDidMount() {
+    this.props.getCategories();
+  }
+
+  createItems = () => {
+    const { categories, filters, onCategoryChange } = this.props;
 
     return categories.map((category) => {
-      const selected = selectedCategories.indexOf(category.id) >= 0;
+      const selected = filters.categories.indexOf(category.id) >= 0;
       return (
         <Category
           id={category.id}
@@ -18,21 +29,33 @@ const Categories = (props) => {
     });
   };
 
-  const handleClear = () => {
-    const { clearSelectedCategories } = props;
+  handleClear = () => {
+    const { clearSelectedCategories } = this.props;
     clearSelectedCategories();
   };
 
-  return (
-    <div>
+  render() {
+    return (
       <div>
-        <button className=".clear" onClick={handleClear}>
-          Clear
-        </button>
+        <div>
+          <button className=".clear" onClick={this.handleClear}>
+            Clear
+          </button>
+        </div>
+        {this.props.isCategoriesLoading ? <Preloader /> : this.createItems()}
       </div>
-      {createItems()}
-    </div>
-  );
-};
+    );
+  }
+}
 
-export default Categories;
+const mapStateToProps = (state) => ({
+  categories: state.catalog.categories,
+  filters: state.catalog.filters,
+  isCategoriesLoading: state.catalog.isCategoriesLoading,
+});
+
+export default connect(mapStateToProps, {
+  getCategories,
+  onCategoryChange: changeCategoryActionCreator,
+  clearSelectedCategories: clearCategoriesActionCreator,
+})(Categories);

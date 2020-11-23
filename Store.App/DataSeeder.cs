@@ -9,10 +9,6 @@ namespace Store.App
 {
     public class DataSeeder
     {
-        private readonly StoreContext context;
-        private readonly UserManager<StoreUser> userManager;
-        private readonly RoleManager<IdentityRole> roleManager;
-
         private static readonly List<Category> categories = new List<Category>
         {
             new Category {Name = "Electronics"},
@@ -29,7 +25,12 @@ namespace Store.App
             new Product {Category = categories[1], Name = "Wilson Volleyball", Image = "wilson.jpg", Price = 30m}
         };
 
-        public DataSeeder(StoreContext context, UserManager<StoreUser> userManager, RoleManager<IdentityRole> roleManager)
+        private readonly StoreContext context;
+        private readonly RoleManager<IdentityRole> roleManager;
+        private readonly UserManager<StoreUser> userManager;
+
+        public DataSeeder(StoreContext context, UserManager<StoreUser> userManager,
+            RoleManager<IdentityRole> roleManager)
         {
             this.context = context;
             this.userManager = userManager;
@@ -39,24 +40,16 @@ namespace Store.App
         public async Task SeedDataAsync()
         {
             if (await roleManager.FindByNameAsync("Admin") == null)
-            {
                 await roleManager.CreateAsync(new IdentityRole {Name = "Admin"});
-            }
 
             // var user = new StoreUser {UserName = "Bob"};
             // await userManager.CreateAsync(user, "123qwe");
             // await userManager.AddToRoleAsync(user, "Admin");
-            
-            await context.Database.EnsureCreatedAsync();
-            if (!context.Categories.Any())
-            {
-                await context.Categories.AddRangeAsync(categories);
-            }
 
-            if (!context.Products.Any())
-            {
-                await context.Products.AddRangeAsync(products);
-            }
+            await context.Database.EnsureCreatedAsync();
+            if (!context.Categories.Any()) await context.Categories.AddRangeAsync(categories);
+
+            if (!context.Products.Any()) await context.Products.AddRangeAsync(products);
 
             await context.SaveChangesAsync();
         }
