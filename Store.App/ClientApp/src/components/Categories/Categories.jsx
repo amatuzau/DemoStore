@@ -13,7 +13,7 @@ class Categories extends Component {
     this.props.getCategories();
   }
 
-  createItems = () => {
+  createItems ()  {
     const { categories, filters, onCategoryChange } = this.props;
 
     return categories.map((category) => {

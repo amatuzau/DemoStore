@@ -28,6 +28,7 @@ namespace Store.App.Controllers
         public async Task<IActionResult> Index(decimal price = 0, int page = 0, int pageSize = 10)
         {
             var categories = await productsService.GetCategoriesWithProducts();
+            var claim = HttpContext.User.FindFirst("cartId");
             return View(categories);
         }
 

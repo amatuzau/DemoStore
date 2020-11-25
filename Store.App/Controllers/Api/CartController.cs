@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Store.App.Controllers.Api.Models;
@@ -9,6 +10,7 @@ using Store.App.Core;
 
 namespace Store.App.Controllers.Api
 {
+    [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
     public class CartsController : Controller

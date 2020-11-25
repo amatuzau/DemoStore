@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using AutoMapper;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Net.Http.Headers;
 using Store.App.Core;
 using Store.App.Filters;
+using Store.App.Identity;
 using Store.App.Mapper;
 using Store.Core;
 using Store.Core.Queries;
@@ -62,16 +64,26 @@ namespace Store.App
                     .EnableSensitiveDataLogging();
             });
 
-            services.AddDefaultIdentity<StoreUser>().AddRoles<IdentityRole>().AddEntityFrameworkStores<StoreContext>();
+            services.AddDefaultIdentity<StoreUser>()
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<StoreContext>()
+                .AddClaimsPrincipalFactory<StoreClaimsPrincipalFactory>();
+
+            services.AddIdentityServer()
+                .AddApiAuthorization<StoreUser, StoreContext>()
+                .AddProfileService<StoreProfileService>();
+
+            services.AddAuthentication()
+                .AddIdentityServerJwt();
 
             services.Configure<IdentityOptions>(options =>
             {
                 // Password settings.
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 6;
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 3;
                 options.Password.RequiredUniqueChars = 1;
 
                 // Lockout settings.
@@ -120,10 +132,7 @@ namespace Store.App
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
 
-            services.AddSpaStaticFiles(config =>
-            {
-                config.RootPath = "ClientApp/build";
-            });
+            services.AddSpaStaticFiles(config => { config.RootPath = "ClientApp/build"; });
         }
 
 
@@ -150,6 +159,7 @@ namespace Store.App
             app.UseRouting();
 
             app.UseAuthentication();
+            app.UseIdentityServer();
             app.UseAuthorization();
 
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "DemoStore API v1"); });

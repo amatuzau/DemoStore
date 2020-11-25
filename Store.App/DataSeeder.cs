@@ -42,11 +42,13 @@ namespace Store.App
             if (await roleManager.FindByNameAsync("Admin") == null)
                 await roleManager.CreateAsync(new IdentityRole {Name = "Admin"});
 
-            // var user = new StoreUser {UserName = "Bob"};
-            // await userManager.CreateAsync(user, "123qwe");
-            // await userManager.AddToRoleAsync(user, "Admin");
+            if (await userManager.FindByNameAsync("user1@example.com") == null)
+            {
+                var user = new StoreUser {UserName = "user1@example.com", Email = "user1@example.com", Cart = new Cart()};
+                await userManager.CreateAsync(user, "user123");
+                await userManager.AddToRoleAsync(user, "Admin");
+            }
 
-            await context.Database.EnsureCreatedAsync();
             if (!context.Categories.Any()) await context.Categories.AddRangeAsync(categories);
 
             if (!context.Products.Any()) await context.Products.AddRangeAsync(products);
