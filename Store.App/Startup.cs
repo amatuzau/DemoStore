@@ -5,9 +5,9 @@ using System.Text.Json.Serialization;
 using AutoMapper;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Antiforgery;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
@@ -69,12 +69,12 @@ namespace Store.App
                 .AddEntityFrameworkStores<StoreContext>()
                 .AddClaimsPrincipalFactory<StoreClaimsPrincipalFactory>();
 
-            services.AddIdentityServer()
-                .AddApiAuthorization<StoreUser, StoreContext>()
-                .AddProfileService<StoreProfileService>();
-
-            services.AddAuthentication()
-                .AddIdentityServerJwt();
+            // services.AddIdentityServer()
+            //     .AddApiAuthorization<StoreUser, StoreContext>()
+            //     .AddProfileService<StoreProfileService>();
+            //
+            // services.AddAuthentication()
+            //     .AddIdentityServerJwt();
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -132,7 +132,7 @@ namespace Store.App
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
 
-            services.AddSpaStaticFiles(config => { config.RootPath = "ClientApp/build"; });
+            services.AddSpaStaticFiles(config => { config.RootPath = "/ClientApp/build"; });
         }
 
 
@@ -152,14 +152,13 @@ namespace Store.App
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseSpaStaticFiles();
 
             app.UseSwagger();
 
             app.UseRouting();
 
             app.UseAuthentication();
-            app.UseIdentityServer();
+            // app.UseIdentityServer();
             app.UseAuthorization();
 
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "DemoStore API v1"); });
@@ -175,15 +174,63 @@ namespace Store.App
                 endpoints.MapControllers();
             });
 
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "ClientApp";
-
-                if (env.IsDevelopment())
+            const string spaPath = "/ClientApp";
+            if (env.IsDevelopment())
+                app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments(spaPath)
+                                   || ctx.Request.Path.StartsWithSegments("/sockjs-node"),
+                    client =>
+                    {
+                        client.UseSpa(spa =>
+                        {
+                            spa.Options.SourcePath = "ClientApp";
+                            spa.UseReactDevelopmentServer("start");
+                        });
+                    });
+            else
+                app.Map(new PathString(spaPath), client =>
                 {
-                    spa.UseReactDevelopmentServer("start");
-                }
-            });
+                    client.UseSpaStaticFiles(new StaticFileOptions
+                    {
+                        OnPrepareResponse = ctx =>
+                        {
+                            if (ctx.Context.Request.Path.StartsWithSegments($"{spaPath}/static"))
+                            {
+                                var headers = ctx.Context.Response.GetTypedHeaders();
+                                headers.CacheControl = new CacheControlHeaderValue
+                                {
+                                    Public = true,
+                                    MaxAge = TimeSpan.FromDays(365)
+                                };
+                            }
+                            else
+                            {
+                                var headers = ctx.Context.Response.GetTypedHeaders();
+                                headers.CacheControl = new CacheControlHeaderValue
+                                {
+                                    Public = true,
+                                    MaxAge = TimeSpan.FromDays(0)
+                                };
+                            }
+                        }
+                    });
+
+                    client.UseSpa(spa =>
+                    {
+                        spa.Options.SourcePath = "ClientApp";
+                        spa.Options.DefaultPageStaticFileOptions = new StaticFileOptions
+                        {
+                            OnPrepareResponse = ctx =>
+                            {
+                                var headers = ctx.Context.Response.GetTypedHeaders();
+                                headers.CacheControl = new CacheControlHeaderValue
+                                {
+                                    Public = true,
+                                    MaxAge = TimeSpan.FromDays(0)
+                                };
+                            }
+                        };
+                    });
+                });
         }
     }
 }
