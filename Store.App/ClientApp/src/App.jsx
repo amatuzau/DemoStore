@@ -9,7 +9,9 @@ import "./App.css";
 import Cart from "./components/Cart/Cart";
 import Catalog from "./components/Catalog/Catalog";
 import Header from "./components/Header/Header";
-import { CART_PATH, CATALOG_PATH } from "./constants";
+import Login from "./components/Login/Login";
+import LoginCallback from "./components/LoginCallback/LoginCallback";
+import { CART_PATH, CATALOG_PATH, LOGIN_PATH } from "./constants";
 
 const App = (props) => {
   return (
@@ -23,6 +25,12 @@ const App = (props) => {
           </Route>
           <Route path={CART_PATH}>
             <Cart />
+          </Route>
+          <Route path={LOGIN_PATH}>
+            <Login />
+          </Route>
+          <Route path={"/authentication/login-callback"}>
+            <LoginCallback />
           </Route>
         </Switch>
       </div>

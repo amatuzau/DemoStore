@@ -59,6 +59,4 @@ namespace Store.App.Controllers
             return RedirectToAction("Index");
         }
     }
-
-
 }

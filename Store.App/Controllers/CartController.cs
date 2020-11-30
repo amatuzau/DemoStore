@@ -65,7 +65,5 @@ namespace Store.App.Controllers
             await cartService.ClearCart(HttpContext.GetCartId());
             return RedirectToAction("Index", "Store");
         }
-
-
     }
 }

@@ -1,9 +1,12 @@
-import { combineReducers, createStore, applyMiddleware, compose } from "redux";
-import catalogReducer from "./catalog-reducer";
+import { applyMiddleware, combineReducers, compose, createStore } from "redux";
+import { reducer as oidcReducer, loadUser } from "redux-oidc";
 import thunk from "redux-thunk";
+import userManager from "../authorization/userManager";
+import catalogReducer from "./catalog-reducer";
 
 const reducers = combineReducers({
   catalog: catalogReducer,
+  oidc: oidcReducer,
 });
 
 const enhancers = compose(
@@ -12,5 +15,6 @@ const enhancers = compose(
 );
 
 const store = createStore(reducers, enhancers);
+loadUser(store, userManager);
 
 export default store;

@@ -1,15 +1,19 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./App";
-import "./index.css";
-import reportWebVitals from "./reportWebVitals";
-import store from "./redux/store";
 import { Provider } from "react-redux";
+import { OidcProvider } from "redux-oidc";
+import App from "./App";
+import userManager from "./authorization/userManager";
+import "./index.css";
+import store from "./redux/store";
+import reportWebVitals from "./reportWebVitals";
 
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
+      <OidcProvider store={store} userManager={userManager}>
+        <App />
+      </OidcProvider>
     </Provider>
   </React.StrictMode>,
   document.getElementById("root")

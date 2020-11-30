@@ -1,6 +1,6 @@
 ﻿import React from "react";
 import { NavLink } from "react-router-dom";
-import { CART_PATH, CATALOG_PATH } from "../../constants";
+import { CART_PATH, CATALOG_PATH, LOGIN_PATH } from '../../constants';
 import style from "./Navigation.module.css";
 
 const Navigation = () => {
@@ -8,7 +8,7 @@ const Navigation = () => {
     <nav className={style.navigation}>
       <NavLink to={CATALOG_PATH}>Catalog</NavLink>
       <NavLink to={CART_PATH}>Cart</NavLink>
-      <NavLink to="#">Login</NavLink>
+      <NavLink to={LOGIN_PATH}>Login</NavLink>
     </nav>
   );
 };
