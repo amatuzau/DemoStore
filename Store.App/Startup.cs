@@ -5,6 +5,8 @@ using System.Text.Json.Serialization;
 using AutoMapper;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -69,12 +71,23 @@ namespace Store.App
                 .AddEntityFrameworkStores<StoreContext>()
                 .AddClaimsPrincipalFactory<StoreClaimsPrincipalFactory>();
 
-            // services.AddIdentityServer()
-            //     .AddApiAuthorization<StoreUser, StoreContext>()
-            //     .AddProfileService<StoreProfileService>();
-            //
-            // services.AddAuthentication()
-            //     .AddIdentityServerJwt();
+            services.AddIdentityServer()
+                .AddApiAuthorization<StoreUser, StoreContext>()
+                .AddProfileService<StoreProfileService>();
+
+            services.AddAuthentication()
+                .AddIdentityServerJwt()
+                .AddPolicyScheme("ApplicationDefinedAuthentication", null, options =>
+                {
+                    options.ForwardDefaultSelector = context => context.Request.Path.StartsWithSegments(
+                        new PathString("/api"),
+                        StringComparison.OrdinalIgnoreCase)
+                        ? IdentityServerJwtConstants.IdentityServerJwtBearerScheme
+                        : IdentityConstants.ApplicationScheme;
+                });
+
+            services.Configure<AuthenticationOptions>(options =>
+                options.DefaultScheme = "ApplicationDefinedAuthentication");
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -158,7 +171,7 @@ namespace Store.App
             app.UseRouting();
 
             app.UseAuthentication();
-            // app.UseIdentityServer();
+            app.UseIdentityServer();
             app.UseAuthorization();
 
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "DemoStore API v1"); });
