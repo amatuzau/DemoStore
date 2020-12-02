@@ -23,7 +23,7 @@ namespace Store.DAL
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Cart> Carts { get; set; }
-        public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Order> Orders { get; set; }
 
         public DbSet<PersistedGrant> PersistedGrants { get; set; }
         public DbSet<DeviceFlowCodes> DeviceFlowCodes { get; set; }
@@ -37,8 +37,9 @@ namespace Store.DAL
             modelBuilder.Entity<Category>().ToTable("Categories");
             modelBuilder.Entity<Product>().ToTable("Products");
             modelBuilder.Entity<Cart>().ToTable("Carts");
-            modelBuilder.Entity<CartItem>().ToTable("CartItems");
-            modelBuilder.Entity<CartItem>().HasKey(ci => new {ci.CartId, ci.ProductId});
+            modelBuilder.Entity<CartItem>().ToTable("CartItems").HasKey(ci => new {ci.CartId, ci.ProductId});
+            modelBuilder.Entity<Order>().ToTable("Orders");
+            modelBuilder.Entity<OrderItem>().ToTable("OrderItems").HasKey(oi => new {oi.OrderId, oi.ProductId});
         }
 
         public Task<int> SaveChangesAsync()
