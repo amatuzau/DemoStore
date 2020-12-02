@@ -7,18 +7,19 @@ using Microsoft.AspNetCore.Mvc;
 using Store.App.Controllers.Api.Models;
 using Store.App.Controllers.Api.Models.Requests;
 using Store.App.Core;
+using Store.App.Identity;
 
 namespace Store.App.Controllers.Api
 {
-    [Authorize]
-    [Route("api/v1/[controller]")]
+    [Authorize(Policy = nameof(CartOwnerOrAdmin))]
+    [Route("api/v1/[controller]/{cartId}")]
     [ApiController]
-    public class CartsController : Controller
+    public class CartController : Controller
     {
         private readonly ICartService cartService;
         private readonly IMapper mapper;
 
-        public CartsController(IMapper mapper, ICartService cartService)
+        public CartController(IMapper mapper, ICartService cartService)
         {
             this.mapper = mapper;
             this.cartService = cartService;
@@ -28,10 +29,9 @@ namespace Store.App.Controllers.Api
         [ProducesResponseType(typeof(CartResource), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetCart()
+        public async Task<IActionResult> GetCart(int cartId)
         {
-            var id = HttpContext.GetCartId();
-            var cart = await cartService.FindCart(id);
+            var cart = await cartService.FindCart(cartId);
 
             if (cart == null) return NotFound();
 
@@ -42,14 +42,13 @@ namespace Store.App.Controllers.Api
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> AddItems([FromBody] AddUpdateCartItemsRequest request)
+        public async Task<IActionResult> AddItems(int cartId, [FromBody] AddUpdateCartItemsRequest request)
         {
-            var id = HttpContext.GetCartId();
-            var cart = await cartService.FindCart(id);
+            var cart = await cartService.FindCart(cartId);
 
             if (cart == null) return NotFound();
 
-            foreach (var item in request.Items) await cartService.AddItemToCart(id, item.ProductId, item.Amount);
+            foreach (var item in request.Items) await cartService.AddItemToCart(cart.Id, item.ProductId, item.Amount);
 
             return NoContent();
         }
@@ -58,25 +57,18 @@ namespace Store.App.Controllers.Api
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateItems([FromBody] AddUpdateCartItemsRequest request)
+        public async Task<IActionResult> UpdateItems(int cartId, [FromBody] AddUpdateCartItemsRequest request)
         {
-            var id = HttpContext.GetCartId();
-            var cart = await cartService.FindCart(id);
+            var cart = await cartService.FindCart(cartId);
 
             if (cart == null) return NotFound();
 
             var requestIds = request.Items.Select(i => i.ProductId).ToArray();
             var cartIds = cart.CartItems.Select(i => i.ProductId).ToArray();
 
-            if (!requestIds.All(ci => cartIds.Contains(ci)))
-            {
-                return BadRequest("All items should be already in cart");
-            }
+            if (!requestIds.All(ci => cartIds.Contains(ci))) return BadRequest("All items should be already in cart");
 
-            foreach (var item in request.Items)
-            {
-                await cartService.ChangeItemCount(id, item.ProductId, item.Amount);
-            }
+            foreach (var item in request.Items) await cartService.ChangeItemCount(cart.Id, item.ProductId, item.Amount);
 
             return NoContent();
         }
@@ -84,14 +76,9 @@ namespace Store.App.Controllers.Api
         [HttpDelete]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> ClearCart()
+        public async Task<IActionResult> ClearCart(int cartId)
         {
-            var id = HttpContext.GetCartId();
-            var cart = await cartService.FindCart(id);
-
-            if (cart == null) return NotFound();
-
-            await cartService.ClearCart(id);
+            await cartService.ClearCart(cartId);
             return NoContent();
         }
     }

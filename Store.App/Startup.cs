@@ -1,4 +1,5 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -7,6 +8,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -58,7 +60,6 @@ namespace Store.App
 
             services.AddScoped<IProductsService, ProductsService>();
             services.AddScoped<ICartService, CartService>();
-            services.AddScoped<CartIdHandler>();
 
             services.AddDbContext<StoreContext>(o =>
             {
@@ -86,8 +87,22 @@ namespace Store.App
                         : IdentityConstants.ApplicationScheme;
                 });
 
+            JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
+
             services.Configure<AuthenticationOptions>(options =>
                 options.DefaultScheme = "ApplicationDefinedAuthentication");
+
+            services.AddAuthorization(opts =>
+            {
+                opts.AddPolicy(nameof(CartOwnerOrAdmin), policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim(Constants.CartClaimName);
+                    policy.AddRequirements(new CartOwnerOrAdmin());
+                });
+            });
+
+            services.AddSingleton<IAuthorizationHandler, CartOwnerOrAdminHandler>();
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -175,8 +190,6 @@ namespace Store.App
             app.UseAuthorization();
 
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "DemoStore API v1"); });
-
-            app.UseMiddleware<CartIdHandler>();
 
             app.UseEndpoints(endpoints =>
             {

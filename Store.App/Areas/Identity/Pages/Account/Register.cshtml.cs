@@ -75,8 +75,7 @@ namespace Store.App.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = new StoreUser { UserName = Input.Email, Email = Input.Email, CartId = HttpContext.GetCartId()
-            };
+                var user = new StoreUser { UserName = Input.Email, Email = Input.Email, Cart = new Cart() };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {

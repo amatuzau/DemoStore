@@ -7,6 +7,6 @@ namespace Store.App
 {
     public static class Constants
     {
-        public const string CartCookieName = "DemoStore.CartId";
+        public const string CartClaimName = "cartId";
     }
 }

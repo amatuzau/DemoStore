@@ -1,23 +1,17 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Store.App.Core;
 using Store.App.Models;
-using Store.DAL.Models;
-using FluentValidation;
-using System.IO;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Store.Core;
 
 namespace Store.App.Controllers
 {
     public class StoreController : Controller
     {
-        private readonly IProductsService productsService;
         private readonly ILogger<StoreController> logger;
+        private readonly IProductsService productsService;
 
         public StoreController(IProductsService productsService, ILogger<StoreController> logger)
         {
@@ -28,7 +22,6 @@ namespace Store.App.Controllers
         public async Task<IActionResult> Index(decimal price = 0, int page = 0, int pageSize = 10)
         {
             var categories = await productsService.GetCategoriesWithProducts();
-            var claim = HttpContext.User.FindFirst("cartId");
             return View(categories);
         }
 
@@ -50,12 +43,9 @@ namespace Store.App.Controllers
         public IActionResult Create(ProductCreateEditModel model)
         {
             if (ModelState.IsValid)
-            {
                 logger.LogDebug(JsonConvert.SerializeObject(model));
-            } else
-            {
+            else
                 return View("ProductCreateEdit", model);
-            }
             return RedirectToAction("Index");
         }
     }

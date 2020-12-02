@@ -6,17 +6,17 @@ using Store.DAL.Models;
 
 namespace Store.App.Identity
 {
-    public class StoreClaimsPrincipalFactory : UserClaimsPrincipalFactory<StoreUser>
+    public class StoreClaimsPrincipalFactory : UserClaimsPrincipalFactory<StoreUser, IdentityRole>
     {
-        public StoreClaimsPrincipalFactory(UserManager<StoreUser> userManager,
-            IOptions<IdentityOptions> optionsAccessor) : base(userManager, optionsAccessor)
+        public StoreClaimsPrincipalFactory(UserManager<StoreUser> userManager, RoleManager<IdentityRole> roleManager,
+            IOptions<IdentityOptions> optionsAccessor) : base(userManager, roleManager, optionsAccessor)
         {
         }
 
         protected override async Task<ClaimsIdentity> GenerateClaimsAsync(StoreUser user)
         {
             var identity = await base.GenerateClaimsAsync(user);
-            identity.AddClaim(new Claim("cartId", user.CartId.ToString()));
+            identity.AddClaim(new Claim(Constants.CartClaimName, user.CartId.ToString()));
             return identity;
         }
     }

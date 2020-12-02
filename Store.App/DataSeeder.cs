@@ -41,12 +41,21 @@ namespace Store.App
         {
             if (await roleManager.FindByNameAsync("Admin") == null)
                 await roleManager.CreateAsync(new IdentityRole {Name = "Admin"});
+            if (await roleManager.FindByNameAsync("User") == null)
+                await roleManager.CreateAsync(new IdentityRole {Name = "User"});
 
             if (await userManager.FindByNameAsync("user1@example.com") == null)
             {
                 var user = new StoreUser {UserName = "user1@example.com", Email = "user1@example.com", Cart = new Cart()};
                 await userManager.CreateAsync(user, "user123");
                 await userManager.AddToRoleAsync(user, "Admin");
+            }
+
+            if (await userManager.FindByNameAsync("user2@example.com") == null)
+            {
+                var user = new StoreUser {UserName = "user2@example.com", Email = "user2@example.com", Cart = new Cart()};
+                await userManager.CreateAsync(user, "user123");
+                await userManager.AddToRoleAsync(user, "User");
             }
 
             if (!context.Categories.Any()) await context.Categories.AddRangeAsync(categories);
