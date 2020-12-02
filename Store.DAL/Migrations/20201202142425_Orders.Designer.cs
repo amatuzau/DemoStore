@@ -10,7 +10,7 @@ using Store.DAL;
 namespace Store.DAL.Migrations
 {
     [DbContext(typeof(StoreContext))]
-    [Migration("20201202130705_Orders")]
+    [Migration("20201202142425_Orders")]
     partial class Orders
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -320,7 +320,12 @@ namespace Store.DAL.Migrations
                     b.Property<decimal>("Total")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Orders");
                 });
@@ -505,6 +510,13 @@ namespace Store.DAL.Migrations
                     b.Navigation("Cart");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Store.DAL.Models.Order", b =>
+                {
+                    b.HasOne("Store.DAL.Models.StoreUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("Store.DAL.Models.OrderItem", b =>

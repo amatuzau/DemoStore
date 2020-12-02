@@ -28,6 +28,11 @@ namespace Store.DAL
         public DbSet<PersistedGrant> PersistedGrants { get; set; }
         public DbSet<DeviceFlowCodes> DeviceFlowCodes { get; set; }
 
+        public Task<int> SaveChangesAsync()
+        {
+            return base.SaveChangesAsync();
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -38,13 +43,8 @@ namespace Store.DAL
             modelBuilder.Entity<Product>().ToTable("Products");
             modelBuilder.Entity<Cart>().ToTable("Carts");
             modelBuilder.Entity<CartItem>().ToTable("CartItems").HasKey(ci => new {ci.CartId, ci.ProductId});
-            modelBuilder.Entity<Order>().ToTable("Orders");
+            modelBuilder.Entity<Order>().ToTable("Orders").HasOne<StoreUser>().WithMany().HasForeignKey(o => o.UserId);
             modelBuilder.Entity<OrderItem>().ToTable("OrderItems").HasKey(oi => new {oi.OrderId, oi.ProductId});
-        }
-
-        public Task<int> SaveChangesAsync()
-        {
-            return base.SaveChangesAsync();
         }
     }
 }

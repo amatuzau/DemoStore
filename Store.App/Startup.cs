@@ -63,6 +63,7 @@ namespace Store.App
 
             services.AddScoped<IProductsService, ProductsService>();
             services.AddScoped<ICartService, CartService>();
+            services.AddScoped<IOrderingService, OrderingService>();
 
             services.AddDbContext<StoreContext>(o =>
             {

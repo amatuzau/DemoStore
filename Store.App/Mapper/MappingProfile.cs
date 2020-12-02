@@ -26,6 +26,16 @@ namespace Store.App.Mapper
                 .ForMember(cri => cri.Product, opt => opt.MapFrom(i => i.Product))
                 .ForMember(cri => cri.Amount, opt => opt.MapFrom(i => i.Count))
                 .ForAllOtherMembers(opt => opt.Ignore());
+
+            CreateMap<Cart, Order>()
+                .ForMember(o => o.Items, opt => opt.MapFrom(c => c.CartItems))
+                .ForMember(o => o.Total, opt => opt.MapFrom(c => c.Total))
+                .ForAllOtherMembers(opt => opt.Ignore());;
+
+            CreateMap<CartItem, OrderItem>()
+                .ForMember(oi => oi.ProductId, opt => opt.MapFrom(ci => ci.ProductId))
+                .ForMember(oi => oi.Count, opt => opt.MapFrom(ci => ci.Count))
+                .ForAllOtherMembers(opt => opt.Ignore());
         }
     }
 }
