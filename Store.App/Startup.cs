@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using AutoMapper;
@@ -19,6 +21,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Net.Http.Headers;
+using Microsoft.OpenApi.Models;
 using Store.App.Core;
 using Store.App.Filters;
 using Store.App.Identity;
@@ -73,7 +76,10 @@ namespace Store.App
                 .AddClaimsPrincipalFactory<StoreClaimsPrincipalFactory>();
 
             services.AddIdentityServer()
-                .AddApiAuthorization<StoreUser, StoreContext>()
+                .AddApiAuthorization<StoreUser, StoreContext>(opt =>
+                {
+                    opt.Clients.First().RedirectUris.Add("/swagger/oauth2-redirect.html");
+                })
                 .AddProfileService<StoreProfileService>();
 
             services.AddAuthentication()
@@ -143,11 +149,30 @@ namespace Store.App
                 options.SlidingExpiration = true;
             });
 
-            services.AddSwaggerGen(c =>
+            services.AddSwaggerGen(opts =>
             {
                 var file = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var path = Path.Combine(AppContext.BaseDirectory, file);
-                c.IncludeXmlComments(path);
+                opts.IncludeXmlComments(path);
+
+                opts.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.OAuth2,
+                    Flows = new OpenApiOAuthFlows
+                    {
+                        AuthorizationCode = new OpenApiOAuthFlow
+                        {
+                            AuthorizationUrl = new Uri("https://localhost:5001/connect/authorize"),
+                            TokenUrl = new Uri("https://localhost:5001/connect/token"),
+                            Scopes = new Dictionary<string, string>
+                            {
+                                {"Store.AppAPI", "Store API"}
+                            }
+                        }
+                    }
+                });
+
+                opts.OperationFilter<AuthorizeCheckOperationFilter>();
             });
 
             services.AddMemoryCache();
@@ -189,7 +214,13 @@ namespace Store.App
             app.UseIdentityServer();
             app.UseAuthorization();
 
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "DemoStore API v1"); });
+            app.UseSwaggerUI(opts =>
+            {
+                opts.SwaggerEndpoint("/swagger/v1/swagger.json", "DemoStore API v1");
+                opts.OAuthClientId("Store.App");
+                opts.OAuthAppName("Store API - Swagger");
+                opts.OAuthUsePkce();
+            });
 
             app.UseEndpoints(endpoints =>
             {
