@@ -2,3 +2,15 @@
     text-transform: uppercase;
     padding: 10px;
 }
+
+.navigation {
+    display: flex;
+}
+
+.linksContainer {
+    flex-grow: 1;
+}
+
+.loginContainer {
+    flex-basis: content;
+}

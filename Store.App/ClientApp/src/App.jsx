@@ -11,9 +11,11 @@ import Catalog from "./components/Catalog/Catalog";
 import Header from "./components/Header/Header";
 import Login from "./components/Login/Login";
 import LoginCallback from "./components/LoginCallback/LoginCallback";
-import { CART_PATH, CATALOG_PATH, LOGIN_PATH } from "./constants";
+import Logout from "./components/Logout/Logout";
+import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
+import { CART_PATH, CATALOG_PATH, LOGIN_PATH, LOGOUT_PATH } from "./constants";
 
-const App = (props) => {
+const App = () => {
   return (
     <Router basename="ClientApp">
       <div className="App">
@@ -23,15 +25,15 @@ const App = (props) => {
           <Route path={CATALOG_PATH}>
             <Catalog />
           </Route>
-          <Route path={CART_PATH}>
-            <Cart />
-          </Route>
+          <PrivateRoute role={"Admin"} path={CART_PATH} component={Cart} />
           <Route path={LOGIN_PATH}>
             <Login />
           </Route>
-          <Route path={"/authentication/login-callback"}>
-            <LoginCallback />
-          </Route>
+          <Route path={LOGOUT_PATH} component={Logout} />
+          <Route
+            path={"/authentication/login-callback"}
+            component={LoginCallback}
+          />
         </Switch>
       </div>
     </Router>

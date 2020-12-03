@@ -4,7 +4,8 @@ import {
   changeCategoryActionCreator,
   clearCategoriesActionCreator,
   getCategories,
-} from "../../redux/catalog-reducer";
+} from "../../redux/reducers/catalog/actions";
+
 import Category from "../Category/Category";
 import Preloader from "../Preloader/Preloader";
 
@@ -13,7 +14,7 @@ class Categories extends Component {
     this.props.getCategories();
   }
 
-  createItems ()  {
+  createItems() {
     const { categories, filters, onCategoryChange } = this.props;
 
     return categories.map((category) => {
@@ -27,7 +28,7 @@ class Categories extends Component {
         />
       );
     });
-  };
+  }
 
   handleClear = () => {
     const { clearSelectedCategories } = this.props;

@@ -17,8 +17,15 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #fff;
     margin: -4px 0 0 -4px;
+}
+
+.white div:after {
+    background: #fff;
+}
+
+.black div:after {
+    background: #000;
 }
 
 .ldsRoller div:nth-child(1) {

@@ -1,11 +1,14 @@
 import { applyMiddleware, combineReducers, compose, createStore } from "redux";
-import { reducer as oidcReducer, loadUser } from "redux-oidc";
+import { loadUser, reducer as oidcReducer } from "redux-oidc";
 import thunk from "redux-thunk";
 import userManager from "../authorization/userManager";
-import catalogReducer from "./catalog-reducer";
+import cartReducer from './reducers/cart';
+import catalogReducer from './reducers/catalog';
+
 
 const reducers = combineReducers({
   catalog: catalogReducer,
+  cart: cartReducer,
   oidc: oidcReducer,
 });
 

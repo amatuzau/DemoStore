@@ -1,5 +1,6 @@
 import axios from "axios";
 import qs from "qs";
+import store from "../redux/store";
 
 const instance = axios.create({
   baseURL: "/api/v1/",
@@ -8,20 +9,31 @@ const instance = axios.create({
   },
 });
 
-export const loadProducts = (filters) => {
-  return instance
-    .get("Products", {
-      params: filters,
-    })
-    .then((response) => {
-      return response.data;
-    });
+instance.interceptors.request.use(function (config) {
+  const { oidc } = store.getState();
+  if (!oidc.isLoading && oidc.user) {
+    config.headers.Authorization = `Bearer ${oidc.user.access_token}`;
+  }
+
+  return config;
+});
+
+export const loadProducts = async (filters) => {
+  const response = await instance.get("Products", {
+    params: filters,
+  });
+
+  return response.data;
 };
 
-export const loadCategories = () => {
-  return instance.get("Categories", {}).then((response) => {
-    return response.data;
-  });
+export const loadCategories = async () => {
+  const response = await instance.get("Categories", {});
+  return response.data;
+};
+
+export const loadCart = async (id) => {
+  const response = await instance.get(`Cart/${id}`);
+  return response.data;
 };
 
 // const image =

@@ -1,6 +1,6 @@
 ﻿import React, { Component } from "react";
 import { connect } from "react-redux";
-import { getProducts } from "../../redux/catalog-reducer";
+import { getProducts } from '../../redux/reducers/catalog/actions';
 import CatalogItems from "../CatalogItems/CatalogItems";
 import Categories from "../Categories/Categories";
 import Filter from "../Filter/Filter";
