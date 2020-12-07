@@ -1,4 +1,4 @@
-import { loadCategories, loadProducts } from "../../../API/store";
+import { storeAPI } from "../../../API/store";
 import {
   ADD_CATEGORY,
   CLEAR_CATEGORIES,
@@ -36,7 +36,7 @@ export const getProducts = (filters) => {
   return async (dispatch) => {
     dispatch(toggleIsLoading());
 
-    const data = await loadProducts(filters);
+    const data = await storeAPI.loadProducts(filters);
     dispatch(toggleIsLoading());
     dispatch(getProductsActionCreator(data));
   };
@@ -46,7 +46,7 @@ export const getCategories = () => {
   return async (dispatch) => {
     dispatch(toggleIsCategoriesLoading());
 
-    const data = await loadCategories();
+    const data = await storeAPI.loadCategories();
     dispatch(toggleIsCategoriesLoading());
     dispatch(loadCategoriesActionCreator(data));
   };

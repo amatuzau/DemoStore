@@ -25,6 +25,7 @@ class Categories extends Component {
           name={category.name}
           onCategoryChange={onCategoryChange}
           selected={selected}
+          key={category.id}
         />
       );
     });

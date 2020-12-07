@@ -1,6 +1,7 @@
 ﻿import React, { Component } from "react";
 import { connect } from "react-redux";
-import { getProducts } from '../../redux/reducers/catalog/actions';
+import { addItemToCart } from "../../redux/reducers/cart/actions";
+import { getProducts } from "../../redux/reducers/catalog/actions";
 import CatalogItems from "../CatalogItems/CatalogItems";
 import Categories from "../Categories/Categories";
 import Filter from "../Filter/Filter";
@@ -18,25 +19,38 @@ class Catalog extends Component {
     }
   }
 
+  onAddToCart = (productId) => {
+    this.props.addItemToCart(productId);
+  };
+
   render() {
+    const {
+      categories,
+      filters,
+      onCategoryChange,
+      clearSelectedCategories,
+      isLoading,
+      products,
+    } = this.props;
+
     return (
       <div className={style.catalog}>
         <div className={style.categories}>
           <Categories
-            categories={this.props.categories}
-            selectedCategories={this.props.filters.categories}
-            onCategoryChange={this.props.onCategoryChange}
-            clearSelectedCategories={this.props.clearSelectedCategories}
+            categories={categories}
+            selectedCategories={filters.categories}
+            onCategoryChange={onCategoryChange}
+            clearSelectedCategories={clearSelectedCategories}
           />
         </div>
         <div className={style.filters}>
           <Filter />
         </div>
         <div className={style.items}>
-          {this.props.isLoading ? (
+          {isLoading ? (
             <Preloader />
           ) : (
-            <CatalogItems products={this.props.products} />
+            <CatalogItems products={products} onAddToCart={this.onAddToCart} />
           )}
         </div>
       </div>
@@ -54,4 +68,5 @@ const mapStateToProps = (state) => {
 
 export default connect(mapStateToProps, {
   getProducts,
+  addItemToCart,
 })(Catalog);

@@ -12,6 +12,7 @@ const CartItems = (props) => {
           [styles.even]: isEven,
           [styles.odd]: !isEven,
         })}
+        key={item.product.id}
       >
         <h3>{item.product.name}</h3>
         <p>Amount: {item.amount}</p>

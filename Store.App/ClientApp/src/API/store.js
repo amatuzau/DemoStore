@@ -18,22 +18,30 @@ instance.interceptors.request.use(function (config) {
   return config;
 });
 
-export const loadProducts = async (filters) => {
-  const response = await instance.get("Products", {
-    params: filters,
-  });
+export const storeAPI = {
+  loadProducts: async (filters) => {
+    const response = await instance.get("Products", {
+      params: filters,
+    });
 
-  return response.data;
-};
-
-export const loadCategories = async () => {
-  const response = await instance.get("Categories", {});
-  return response.data;
-};
-
-export const loadCart = async (id) => {
-  const response = await instance.get(`Cart/${id}`);
-  return response.data;
+    return response.data;
+  },
+  loadCategories: async () => {
+    const response = await instance.get("Categories", {});
+    return response.data;
+  },
+  loadCart: async (id) => {
+    const response = await instance.get(`Cart/${id}`);
+    return response.data;
+  },
+  addToCart: async (id, items) => {
+    const response = await instance.post(`Cart/${id}`, { items });
+    return response.data;
+  },
+  sendOrder: async (orderDetails) => {
+    const response = await instance.post("Orders", orderDetails);
+    return response.data;
+  },
 };
 
 // const image =
