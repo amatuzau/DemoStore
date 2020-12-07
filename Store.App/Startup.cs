@@ -24,6 +24,7 @@ using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Store.App.Core;
 using Store.App.Filters;
+using Store.App.Hubs;
 using Store.App.Identity;
 using Store.App.Mapper;
 using Store.Core;
@@ -58,6 +59,8 @@ namespace Store.App
                 })
                 .AddJsonOptions(opts => opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
                 .AddRazorRuntimeCompilation();
+
+            services.AddSignalR();
 
             services.AddScoped<CacheFilterAttribute>();
 
@@ -230,6 +233,7 @@ namespace Store.App
                     "default",
                     "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllers();
+                endpoints.MapHub<OrdersHub>("/ordershub");
             });
 
             const string spaPath = "/ClientApp";

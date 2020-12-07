@@ -13,6 +13,7 @@ import Login from "./components/Login/Login";
 import LoginCallback from "./components/LoginCallback/LoginCallback";
 import Logout from "./components/Logout/Logout";
 import OrderModal from "./components/OrderModal";
+import Orders from './components/Orders';
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
 import { CART_PATH, CATALOG_PATH, LOGIN_PATH, LOGOUT_PATH } from "./constants";
 
@@ -27,6 +28,7 @@ const App = () => {
             <Catalog />
           </Route>
           <PrivateRoute role={"Admin"} path={CART_PATH} component={Cart} />
+          <Route path={"/orders"} component={Orders} />
           <Route path={LOGIN_PATH}>
             <Login />
           </Route>

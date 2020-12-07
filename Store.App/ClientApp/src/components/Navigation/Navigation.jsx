@@ -9,6 +9,7 @@ const Navigation = () => {
     <nav className={style.navigation}>
       <div className={style.linksContainer}>
         <NavLink to={CATALOG_PATH}>Catalog</NavLink>
+        <NavLink to={"/orders"}>Orders</NavLink>
       </div>
       <div className={style.loginContainer}>
         <NavigationLogin />
