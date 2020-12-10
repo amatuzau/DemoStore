@@ -8,5 +8,6 @@ namespace Store.App
     public static class Constants
     {
         public const string CartClaimName = "cartId";
+        public const string AdminGroup = "Admin";
     }
 }

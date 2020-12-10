@@ -27,8 +27,8 @@ const App = () => {
           <Route path={CATALOG_PATH}>
             <Catalog />
           </Route>
-          <PrivateRoute role={"Admin"} path={CART_PATH} component={Cart} />
-          <Route path={"/orders"} component={Orders} />
+          <PrivateRoute path={CART_PATH} component={Cart} />
+          <PrivateRoute path={"/orders"} role={"Admin"} component={Orders} />
           <Route path={LOGIN_PATH}>
             <Login />
           </Route>

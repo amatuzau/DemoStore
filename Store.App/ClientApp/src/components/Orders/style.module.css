@@ -1,0 +1,8 @@
+.order {
+    background-color: darkkhaki;
+    padding: 20px;
+}
+
+.locked {
+    border: 2px solid green;
+}

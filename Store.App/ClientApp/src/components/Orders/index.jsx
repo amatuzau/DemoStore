@@ -1,46 +1,34 @@
+import classNames from "classnames";
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { ordersHub } from "../../API/ordershub";
+import { lockOrder } from "../../redux/reducers/order/actions";
+import styles from "./style.module.css";
 
 class Orders extends Component {
-  constructor(props) {
-    super(props);
-    this.connection = ordersHub;
-    this.connection.on("GetNewOrder", (order) => {
-      this.setState({ orders: [...this.state.orders, order] });
-    });
-    this.state = { orders: [] };
-  }
-
-  componentDidMount() {
-    this.connection.onclose(this.start);
-    this.start();
-  }
-
-  sendMessage(clientId) {
-    this.connection.invoke("GetNewOrder", { clientId });
-  }
-
-  async start() {
-    try {
-      await this.connection.start();
-      console.log("SignalR Connected.");
-    } catch (err) {
-      console.log(err);
-      setTimeout(this.start, 5000);
-    }
-  }
-
   render() {
+    const { orders, lockedOrders, lockOrder, user } = this.props;
     return (
       <div>
-        {this.state.orders.map((order, index) => {
+        {orders.map((order) => {
+          const isLocked = lockedOrders[order.id] !== undefined;
+          const classes = classNames({
+            [styles.order]: true,
+            [styles.locked]: isLocked,
+          });
+
           return (
-            <div key={order.id}>
+            <div key={order.id} className={classes}>
               <div>{order.userId}</div>
               <div>{order.address}</div>
               <div>{order.phone}</div>
               <div>{order.total}</div>
+              {!isLocked && (
+                <button
+                  onClick={() => lockOrder({ userId: user.sub, orderId: order.id })}
+                >
+                  Lock Order
+                </button>
+              )}
             </div>
           );
         })}
@@ -50,7 +38,11 @@ class Orders extends Component {
 }
 
 function mapStateToProps(state) {
-  return {};
+  return {
+    orders: state.order.orders,
+    lockedOrders: state.order.lockedOrders,
+    user: state.oidc.user.profile,
+  };
 }
 
-export default connect(mapStateToProps)(Orders);
+export default connect(mapStateToProps, { lockOrder })(Orders);

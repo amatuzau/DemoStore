@@ -43,7 +43,7 @@ namespace Store.App.Controllers.Api
 
             var newOrder = await orderingService.GetOrder(id);
 
-            await hubContext.Clients.All.GetNewOrder(newOrder);
+            await hubContext.Clients.Group(Constants.AdminGroup).GetNewOrder(newOrder);
 
             return CreatedAtAction("Get", id);
         }

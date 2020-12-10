@@ -1,12 +1,13 @@
-import { applyMiddleware, combineReducers, compose, createStore } from "redux";
+import { applyMiddleware, combineReducers, createStore } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
-import { loadUser, reducer as oidcReducer } from "redux-oidc";
 import { reducer as formReducer } from "redux-form";
+import { loadUser, reducer as oidcReducer } from "redux-oidc";
 import thunk from "redux-thunk";
 import userManager from "../authorization/userManager";
 import cartReducer from "./reducers/cart";
 import catalogReducer from "./reducers/catalog";
 import orderReducer from "./reducers/order";
+import { signalRMiddleware } from "./signalr";
 
 const reducers = combineReducers({
   catalog: catalogReducer,
@@ -16,7 +17,7 @@ const reducers = combineReducers({
   form: formReducer,
 });
 
-let enhancers = applyMiddleware(thunk);
+let enhancers = applyMiddleware(thunk, signalRMiddleware);
 enhancers = composeWithDevTools(enhancers);
 
 const store = createStore(reducers, enhancers);
