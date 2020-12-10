@@ -24,7 +24,9 @@ class Orders extends Component {
               <div>{order.total}</div>
               {!isLocked && (
                 <button
-                  onClick={() => lockOrder({ userId: user.sub, orderId: order.id })}
+                  onClick={() =>
+                    lockOrder({ userId: user.sub, orderId: order.id })
+                  }
                 >
                   Lock Order
                 </button>

@@ -3,9 +3,10 @@ import { getCart } from "../cart/actions";
 import {
   CLOSE_MODAL,
   GET_LOCKED_ORDER,
-  GET_NEW_ORDER, LOCK_ORDER,
+  GET_NEW_ORDER,
+  LOCK_ORDER,
   OPEN_MODAL,
-} from './index';
+} from "./index";
 
 export const openModal = () => ({
   type: OPEN_MODAL,

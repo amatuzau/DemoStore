@@ -1,11 +1,11 @@
 import {
   HubConnectionBuilder,
-  LogLevel,
   HubConnectionState,
+  LogLevel,
 } from "@microsoft/signalr";
+import { USER_FOUND } from "redux-oidc";
 import { LOCK_ORDER } from "../reducers/order";
 import { getLockedOrder, getNewOrder } from "../reducers/order/actions";
-import { USER_FOUND } from "redux-oidc";
 
 const start = async (connection) => {
   try {

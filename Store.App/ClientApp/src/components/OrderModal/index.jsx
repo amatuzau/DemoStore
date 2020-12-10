@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
 import Modal from "react-modal";
+import { connect } from "react-redux";
 import { closeModal, sendOrder } from "../../redux/reducers/order/actions";
 import OrderForm from "../OrderForm";
 

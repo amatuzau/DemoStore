@@ -15,7 +15,7 @@ const settings = {
   response_type: "code",
   scope: "Store.AppAPI openid profile",
   monitorSession: false,
-  post_logout_redirect_uri: "https://localhost:5001/ClientApp"
+  post_logout_redirect_uri: "https://localhost:5001/ClientApp",
 };
 
 export default createUserManager(settings);
