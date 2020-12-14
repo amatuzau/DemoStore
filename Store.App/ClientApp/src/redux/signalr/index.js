@@ -32,7 +32,9 @@ export const signalRMiddleware = (storeAPI) => {
   start(connection).then(() => {
     const state = storeAPI.getState();
     const role = state.oidc.user && state.oidc.user.profile.role;
-    joinGroup(connection, role);
+    if (role) {
+      joinGroup(connection, role);
+    }
   });
 
   connection.on("GetNewOrder", (order) => {
@@ -44,11 +46,14 @@ export const signalRMiddleware = (storeAPI) => {
   });
 
   return (next) => (action) => {
+    // eslint-disable-next-line default-case
     switch (action.type) {
       case LOCK_ORDER:
         connection.invoke("LockOrder", action.order);
+        break;
       case USER_FOUND:
         joinGroup(connection, action.payload.profile.role);
+        break;
     }
     next(action);
   };
